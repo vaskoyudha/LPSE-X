@@ -3,6 +3,7 @@ import socket
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from backend.config import config_router
 
 app = FastAPI(
     title="LPSE-X API",
@@ -16,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(config_router)
 
 
 @app.get("/health")

@@ -1,16 +1,31 @@
 # LPSE-X Runtime Configuration
-# ALL parameters MUST be injectable via PUT /api/config/inject
+# All parameters below are injectable via PUT /api/config/inject
+# Changes apply INSTANTLY without server restart
+
+# Procurement category filter (konstruksi/barang/jasa_konsultansi/jasa_lainnya)
 procurement_scope: "konstruksi"
+
+# Institution whitelist (empty = all 5 LPSE institutions)
 institution_filter: []
+
+# Risk score threshold 0.0-1.0 (tenders above this are flagged)
 risk_threshold: 0.65
+
+# Analysis year range
 year_range:
   start: 2022
   end: 2024
+
+# Detection method (isolation_forest/xgboost/ensemble)
 anomaly_method: "ensemble"
+
+# Output format (dashboard/api_json/audit_report)
 output_format: "dashboard"
+
+# Wildcard dictionary for unexpected judge-injected parameters
 custom_params: {}
 
-# Internal (not injectable)
+# --- Internal (not injectable via API) ---
 database_path: "data/lpse_x.db"
 models_path: "models/"
 reports_path: "reports/"
