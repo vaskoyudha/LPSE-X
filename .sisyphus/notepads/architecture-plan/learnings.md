@@ -1,0 +1,5 @@
+- Used multiple Mermaid diagram types (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2) for comprehensive architecture documentation.
+- Ensured all 27 contractual terms were present verbatim and validated by automated QA checks.
+- Successfully avoided forbidden terms (cloud, OpenAI, etc.) in a localhost-only project.
+- Validated Mermaid syntax and structure using Python-based automated checks before finishing.
+- Dynamic Injection and local-only SQLite storage were key components of the documented architecture.

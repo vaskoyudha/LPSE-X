@@ -1,0 +1,204 @@
+[Format: PDF | Font: Times New Roman 12 pt (isi), 14 pt (judul bab) | Spasi: 1.15 | Margin: Kiri 3 cm, Kanan 2 cm, Atas 2 cm, Bawah 2 cm]
+[Nama File: Hackathon2026_[NamaTim]_LPSE-X_Proposal.pdf]
+
+---
+
+# LPSE-X: *Explainable AI & Forensic Behavioral Analytics* untuk Deteksi Persekongkolan Tender pada Pengadaan Pemerintah Indonesia
+
+**Track:** C — *The Explainable Oracle* (*Predictive Analytics*)
+**Subtopik:** *Smart Governance & Public Service*
+**Jenis Task AI:** *Anomaly Detection*
+
+---
+
+## a. Latar Belakang & *Problem Statement*
+
+### Konteks Masalah
+
+Pengadaan barang/jasa pemerintah Indonesia bernilai **Rp 1.214,3 triliun per tahun**, menjadikannya pos belanja terbesar kedua APBN setelah transfer ke daerah. Seluruh proses tender tercatat secara digital melalui Sistem Pengadaan Secara Elektronik (SPSE) yang dikelola LKPP di lebih dari 650 instansi LPSE seluruh Indonesia. Namun, di balik digitalisasi tersebut terdapat krisis integritas yang mengancam kedaulatan fiskal negara. Studi Amalia & Ismail (2025) menegaskan SPSE v4.5 **tidak memiliki kapabilitas deteksi kecurangan** sama sekali — hanya sistem transaksi dan dukungan keputusan.
+
+### Mengapa Penting dan Mendesak
+
+Indonesia menempati **peringkat 109 dari 180 negara** dalam *Corruption Perception Index* 2024 dengan skor **34/100** — turun dari peringkat 99, menandakan tren penurunan. KPK mengidentifikasi lebih dari **70% kasus korupsi** yang ditangani terkait pengadaan barang/jasa. *Indonesia Corruption Watch* (ICW) mencatat **364 kasus korupsi** sepanjang 2024 dengan potensi kerugian negara **Rp 279,9 triliun**. Presiden Prabowo menegaskan bahwa digitalisasi merupakan pilar utama dalam pemberantasan korupsi dan penutupan celah kebocoran anggaran (Pidato Pelantikan, 20 Oktober 2024).
+
+**Instruksi Presiden Nomor 1 Tahun 2025** tentang Efisiensi Belanja Negara menargetkan penghematan **Rp 306,69 triliun** — sebuah mandat yang membutuhkan alat audit cerdas. Pada Desember 2025, KPK bersama BPKP dan LKPP meluncurkan **e-Audit Katalog v6** yang mulai menggunakan AI untuk pengawasan pengadaan. Pada Januari 2026, Ketua KPK **Setyo Budiyanto** mengonfirmasi bahwa KPK telah menerapkan AI untuk verifikasi LHKPN terhadap **1.000 penyelenggara negara** — membuktikan bahwa pemerintah secara aktif mengadopsi AI anti-korupsi dan membutuhkan lebih banyak alat cerdas (Detik, 28/1/2026). Santos *et al.* (2025) dalam survei sistematis terbaru di *EPJ Data Science* memetakan seluruh metode ML untuk deteksi kecurangan pengadaan — dan **tidak satupun sistem yang menggabungkan supervised ML + graf + XAI multilapis pada data Indonesia**.
+
+### Siapa yang Terkena Dampak
+
+- **Auditor pemerintah** (BPKP, Inspektorat, KPK) — saat ini hanya mampu memeriksa <1% paket tender via *random sampling*; 99% potensi kecurangan lolos
+- **Vendor jujur** — tereliminasi oleh persekongkolan harga dan kartel tender
+- **Masyarakat** — menanggung dampak kualitas infrastruktur dan layanan publik yang di bawah standar akibat korupsi pengadaan
+- **Pemerintah pusat & daerah** — kehilangan ratusan triliun rupiah potensi efisiensi anggaran
+
+### Data dan Fakta Pendukung
+
+| Indikator | Nilai | Sumber |
+|---|---|---|
+| Belanja pengadaan nasional/tahun | Rp 1.214,3 T | LKPP, 2024 |
+| Kasus korupsi terkait pengadaan | >70% dari seluruh kasus KPK | KPK (Nawawi Pomolango), 2020 |
+| Kasus korupsi tercatat (2024) | 364 kasus, Rp 279,9 T kerugian | ICW, 2024 |
+| CPI Indonesia 2024 | 34/100, peringkat 109/180 | Transparency International |
+| Target efisiensi belanja negara | Rp 306,69 T | Inpres No.1/2025 |
+
+### Dampak jika Masalah Tidak Diselesaikan
+
+Tanpa alat deteksi yang cerdas dan transparan, modus persekongkolan tender (*bid-rigging*) — di mana kartel vendor mengatur pemenang, harga, dan spesifikasi — akan terus menggerus anggaran negara tanpa terdeteksi. Auditor tetap bergantung pada *random sampling* yang tidak efisien. Celah kebocoran yang ditargetkan Inpres No.1/2025 tidak akan pernah tertutup. Indonesia akan terus mengalami penurunan CPI.
+
+---
+
+## b. Solusi yang Diusulkan & Model AI
+
+### Deskripsi Solusi
+
+**LPSE-X** (*LPSE Explainable Forensic Analytics*) adalah platform *Smart Governance* berbasis *Explainable AI* (XAI) yang secara otomatis mendeteksi pola persekongkolan tender melalui analisis perilaku forensik dari data pengadaan, dan menerjemahkan setiap sinyal anomali ke dalam penjelasan transparan yang dapat dijadikan dasar hipotesis audit oleh manusia.
+
+### Output yang Dihasilkan
+
+1. **Skor risiko per paket tender** — klasifikasi empat level: *Aman / Perlu Pantauan / Risiko Tinggi / Risiko Kritis*
+2. **Penjelasan forensik transparan** — visualisasi SHAP yang menunjukkan *mengapa* suatu tender ditandai (kontribusi setiap fitur dalam persentase)
+3. **Peta risiko interaktif** — heatmap geografis tingkat risiko per instansi/wilayah
+4. **Graf jaringan kartel** — visualisasi kluster vendor yang sering tampil bersama secara mencurigakan
+5. **Laporan pra-investigasi otomatis** — draf narasi Bahasa Indonesia mengacu pada Standar IIA 2025, siap dijadikan dasar hipotesis audit awal
+
+Contoh output SHAP:
+> *"Paket Tender Konstruksi ID-2024-0847 — probabilitas persekongkolan: 91%.*
+> *Faktor: (1) Selisih penawaran 3 peserta hanya 0,3% dari HPS [SHAP: 32%]. (2) Distribusi digit pertama nilai penawaran menyimpang dari Hukum Benford, χ² = 47,3 [28%]. (3) Vendor pemenang menang 8 kali berturut dari SKPD yang sama [22%]. (4) Dua dari tiga peserta berbagi direktur yang sama [18%]."*
+> *"Penjelasan counterfactual (DiCE): Tender ini TIDAK akan ditandai jika: (1) Selisih penawaran antar-peserta >5% dari HPS, DAN (2) Vendor pemenang memiliki <3 kemenangan di instansi yang sama."*
+
+### Bagaimana Solusi Berbeda/Lebih Baik dari yang Sudah Ada
+
+| Sistem yang Ada | Keterbatasan | Keunggulan LPSE-X |
+|---|---|---|
+| **JAGA (KPK)** | Berbasis aturan statis, hanya realisasi anggaran | ML mendeteksi pola tersembunyi + non-linear |
+| **opentender.net (ICW)** | 7 indikator heuristik, tanpa ML | **73 indikator OCP + 12 fitur ML + deteksi kartel graf + XAI multilapis** |
+| **ARACHNE (EU)** | Skor risiko 1–10, data terbatas pada EU | Tanpa XAI dan tanpa analisis jaringan |
+| **Imhof et al. (Swiss Competition Commission)** | GAT 91% akurasi pada 13 pasar | Tanpa counterfactual dan tanpa konteks Indonesia |
+| **e-Audit Katalog v6** | Baru diluncurkan Des 2025, fokus e-Katalog, belum mencakup *bid-rigging* | Fokus spesifik pada persekongkolan tender — melengkapi e-Audit |
+| **Audit manual BPKP** | Memeriksa <1% tender, *random sampling* | Memindai 100% tender, memprioritaskan yang paling berisiko |
+
+Filosofi desain: **AI menghasilkan draf dan memprioritaskan, manusia memvalidasi dan memutuskan** — memastikan AI berfungsi sebagai alat bantu, bukan pengganti otoritas manusia.
+
+### Pendekatan Model & Teknologi
+
+**Jenis Task AI:** *Anomaly Detection* (Kategori Data Prediction)
+
+**Arsitektur Model (5 Mekanisme Inti):**
+
+**1. Rekayasa Fitur Forensik (12 Sinyal) + 73 Indikator OCP**
+
+*8 fitur inti:*
+
+| Sinyal | Apa yang Diukur |
+|---|---|
+| *Bid Clustering Score* | Kedekatan nilai penawaran antar peserta relatif terhadap HPS |
+| *Vendor Win Concentration* | Frekuensi kemenangan vendor yang sama di instansi yang sama |
+| *HPS Deviation Ratio* | Selisih penawaran pemenang terhadap HPS |
+| *Participant Count Anomaly* | Jumlah peserta vs rata-rata kategori sejenis |
+| *Geographic Concentration* | Dominasi vendor dari satu wilayah pada tender lintas-daerah |
+| *Repeat Pairing Index* | Frekuensi kombinasi vendor yang sama di berbagai tender |
+| *Temporal Submission Pattern* | Pola waktu pengajuan penawaran dan korelasi antar peserta |
+| *Historical Win Rate* | Rasio kemenangan vendor vs rata-rata nasional |
+
+*4 fitur lanjutan (berdasarkan literatur terkini):*
+
+| Sinyal | Apa yang Diukur |
+|---|---|
+| *Phantom Bidder Detection* | Peserta yang *selalu kalah* namun terus hadir — memenuhi syarat minimum peserta |
+| *Benford's Law Anomaly* | Distribusi digit pertama nilai penawaran vs distribusi Benford (uji χ²) |
+| *Interlocking Directorates* | Tumpang-tindih kepemilikan/direksi antar peserta dalam satu tender |
+| *Bid Rotation Pattern* | Pola rotasi pemenang antar tender dalam kluster kartel |
+
+Di atas itu, LPSE-X mengimplementasikan **73 indikator *Red Flags* OCP (OCP, 2024)** melalui *Cardinal library* berbasis OCDS. **ICW menggunakan 7 indikator heuristik; LPSE-X mengimplementasikan 73 indikator OCP ditambah 12 fitur ML kustom** — 10x lebih komprehensif.
+
+**2. Deteksi Kartel Berbasis Graf + GAT**
+- Graf bipartit Peserta–Tender menggunakan NetworkX
+- **Leiden algorithm** (*leidenalg*) menggantikan Louvain — memperbaiki *resolution limit* sehingga lebih baik untuk mendeteksi kartel kecil
+- **Graph Attention Networks (GAT)** untuk deteksi kolusi, merujuk Imhof, Viklund & Huber (2025) dengan **91% akurasi** pada 13 pasar
+- Bobot perhatian GAT memberi **explainability graf bawaan**; diperkuat oleh visualisasi kluster Leiden
+- Rujukan metodologis tambahan: Pompeu & Filho (2025) untuk GraphSAGE pada kolusi pengadaan
+
+**3. *Dual-Method* AI dengan Protokol *Disagreement***
+- **Isolation Forest** (unsupervised): mendeteksi anomali tanpa label — ideal karena mayoritas kecurangan belum terungkap (divalidasi Majilana, 2025)
+- **XGBoost** (supervised): untuk data berlabel (kasus KPK inkrah), klasifikasi empat level risiko
+- **Protokol *ensemble*:** skor akhir = rata-rata tertimbang kedua model. Ketika kedua model memberikan sinyal berlawanan (IF: anomali, XGB: aman, atau sebaliknya), tender otomatis ditandai *"Manual Review Priority"* untuk pemeriksaan auditor
+- **Target: F1-Score ≥0,90** (melampaui *baseline* Westerski *et al.* 2021: 0,85–0,92; mendekati akurasi GAT Imhof *et al.* 2025: 91%)
+
+**4. Oracle Sandwich: Arsitektur XAI 4 Lapis**
+- **Layer 1 — Global:** TreeSHAP + **shapiq** (interaksi fitur) untuk ringkasan pola risiko global
+- **Layer 2 — Local:** **DiCE counterfactuals** (dice-ml) + **Anchors** (alibi) sebagai aturan *if–then* presisi tinggi; *“Apa yang harus berubah agar tender ini TIDAK ditandai?”*
+- **Layer 3 — Graph:** Komunitas **Leiden** + bobot perhatian **GAT** sebagai penjelasan jaringan kartel
+- **Layer 4 — Statistical:** **Benford’s Law** (benford_py) + **73 indikator OCP** + HHI konsentrasi
+Arsitektur ini memenuhi Pasal 86 **EU AI Act** tentang penjelasan yang *jelas dan mudah dipahami*, menjadikan LPSE-X **bukan hanya proyek hackathon tetapi sistem siap-ekspor** (Thanathamathee & Sawangarreerak, 2024; OCP, 2024).
+
+**5. Laporan Pra-Investigasi Otomatis**
+- *Template-based Natural Language Generation* (NLG), bukan LLM generatif — lebih konsisten dan *legally defensible*
+- Format mengacu pada Standar IIA (*Institute of Internal Auditors*) 2025
+
+**Teknologi:**
+
+| Komponen | Teknologi |
+|---|---|
+| Model ML | XGBoost + Isolation Forest |
+| Analisis Graf | NetworkX + **leidenalg** + (GAT, PyTorch Geometric) |
+| Eksplainabilitas | SHAP + LIME + **shapiq** + **dice-ml** + **alibi (Anchors)** |
+| Statistik Forensik | **benford_py** + OCP Cardinal (73 red flags) |
+| Inferensi | ONNX Runtime (<200 ms/prediksi, CPU standar) |
+| *Backend* | Python 3.11, FastAPI + Uvicorn |
+| *Frontend* | Streamlit + Plotly + Folium |
+| *Database* | SQLite (*zero-configuration*, *localhost-ready*) |
+| Konfigurasi | YAML + Pydantic |
+
+**Ketahanan *Dynamic Injection*:** Seluruh parameter operasional (`procurement_scope`, `institution_filter`, `risk_threshold`, `year_range`, `anomaly_method`, `output_format`) dikonfigurasi melalui `runtime_config.yaml` dan dapat diinjeksi *live* via *endpoint* `PUT /api/config/inject` tanpa *restart* server maupun *retraining* model. Arsitektur modular ini memastikan kepatuhan terhadap persyaratan *Runtime Variable* kompetisi.
+
+### Kebaruan (*Novelty*)
+
+LPSE-X menghadirkan tiga kebaruan yang belum ditemukan pada sistem pengawasan pengadaan manapun di Indonesia:
+1. **Arsitektur Oracle Sandwich** — satu-satunya sistem yang menggabungkan XAI 4 lapis (Global SHAP + Local DiCE/Anchors + Graph Leiden/GAT + Statistical Benford) pada data pengadaan
+2. **73 indikator OCP + 12 fitur ML** — 10x lebih komprehensif dari 7 indikator heuristik ICW
+3. **Pertama di Indonesia** — sistem berbasis ML + graf + XAI pada data SPSE Indonesia; gap dikonfirmasi secara akademis (Amalia & Ismail, 2025)
+
+---
+
+## c. Data
+
+### Sumber Data
+
+| No. | Dataset | Sumber & Metode Akses | URL/Referensi | Estimasi Volume |
+|---|---|---|---|---|
+| 1 | **opentender.net (PRIMARY)** — data tender nasional (OCDS), 55+ field per tender, termasuk HPS, nilai penawaran, peserta, pemenang, HHI, jadwal, dan metadata | **REST API + bulk export endpoints** (OCDS), kompatibel dengan **Cardinal library**; terdaftar di OCP Data Registry | opentender.net; data.open-contracting.org/en/publication/101 | **1.106.096 tender** |
+| 2 | **Data Tender LPSE tingkat rinci** — detail peserta, histori vendor, dan *field* SPSE khusus | `pyproc` (Python *wrapper*, MIT *license*, PyPI) — akses *endpoint* DataTables internal SPSE | github.com/wakataw/pyproc | Ratusan ribu paket/tahun (per LPSE) |
+| 3 | **Rencana Umum Pengadaan (SiRUP)** — rencana vs realisasi per instansi | LKPP *Open Data* — XLSX/JSON | data.lkpp.go.id | Jutaan item |
+| 4 | **Data Perkara Korupsi Pengadaan** — kasus inkrah sebagai label *supervised learning* | Agregasi data penindakan KPK, putusan MA, dan pemantauan ICW (2018–2024) | kpk.go.id, putusan3.mahkamahagung.go.id, antikorupsi.org | 250+ kasus terlabel (*curated dataset*) |
+
+**Metode akses alternatif (bulk):** *Kingfisher Collect* (OCP) untuk unduh massal data OCDS dari penerbit opentender.net.
+
+**Data *custom*:** Riwayat kemenangan dan frekuensi keikutsertaan vendor diekstraksi melalui `pyproc` (*rate-limited* 1 *request*/2 detik dengan *exponential backoff*; hasil di-*cache* ke SQLite setelah penarikan pertama). Data mencukupi untuk fitur *Vendor Win Concentration*, *Repeat Pairing Index*, *Phantom Bidder Detection*, dan *Historical Win Rate*.
+
+**Cakupan Demo MVP:** **Nasional (semua sektor)** berbasis opentender.net 2018–2024, dengan *drill-down* LPSE untuk validasi rinci menggunakan `pyproc`.
+
+### Persiapan Data
+
+**Pembersihan:**
+- *Missing values*: imputasi median untuk fitur numerik; penghapusan baris dengan data kritis tidak lengkap (HPS, nilai penawaran)
+- *Outliers*: deteksi via IQR pada nilai kontrak; outlier dipertahankan jika terindikasi sebagai anomali riil (bukan kesalahan input)
+- Normalisasi format (mata uang, tanggal, kode instansi) antar sumber data
+
+**Penanganan *Imbalance Class*:**
+- Data kecurangan bersifat *highly imbalanced* (kasus *fraud* << kasus bersih)
+- **Isolation Forest** sebagai metode utama — tidak bergantung pada label
+- **SMOTE + *Class Weighting*** pada XGBoost — penalti lebih besar pada *false negatives* (tender *fraud* yang lolos)
+- Evaluasi menggunakan **Macro F1-*Score*, *Recall*, dan *Precision*@K** — bukan akurasi mentah
+
+**Pembagian Data (*Temporal Split*):**
+
+| Partisi | Tahun | Proporsi | Fungsi |
+|---|---|---|---|
+| *Training* | 2018–2021 | 70% | Melatih model mengenali pola kecurangan historis |
+| *Validation* | 2022 | 15% | *Hyperparameter tuning* via Optuna (*search space*: `learning_rate` 0,01–0,3; `max_depth` 3–10; `n_estimators` 100–1.000; `subsample` 0,6–1,0; `colsample_bytree` 0,6–1,0) + pencegahan *overfitting* |
+| *Test* | 2023–2024 | 15% | Evaluasi performa pada data yang belum pernah dilihat model |
+
+Ditambah **5-*Fold Temporal Cross-Validation*** (TimeSeriesSplit) dalam *training set* untuk validasi silang yang *robust*.
+
+---
+
+> *"Kedaulatan digital bukan hanya tentang menjaga data di dalam negeri — tetapi tentang membangun kecerdasan yang memampukan bangsa mengawasi dirinya sendiri. LPSE-X mewujudkan visi ini: AI yang transparan, berdaulat, dan berpihak pada integritas."*

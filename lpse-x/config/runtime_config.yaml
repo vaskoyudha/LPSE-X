@@ -1,0 +1,18 @@
+# LPSE-X Runtime Configuration
+# ALL parameters MUST be injectable via PUT /api/config/inject
+procurement_scope: "konstruksi"
+institution_filter: []
+risk_threshold: 0.65
+year_range:
+  start: 2022
+  end: 2024
+anomaly_method: "ensemble"
+output_format: "dashboard"
+custom_params: {}
+
+# Internal (not injectable)
+database_path: "data/lpse_x.db"
+models_path: "models/"
+reports_path: "reports/"
+random_seed: 42
+log_level: "INFO"
