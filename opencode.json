@@ -1,15 +1,13 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "mermaid": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-mermaid"
-      ],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-mermaid"],
+      "environment": {
         "MERMAID_THEME": "default"
-      }
+      },
+      "enabled": true
     }
   }
 }
