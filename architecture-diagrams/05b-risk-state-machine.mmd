@@ -1,0 +1,18 @@
+stateDiagram-v2
+    [*] --> Aman: score < risk_threshold_low
+    Aman --> Perlu_Pantauan: score >= risk_threshold_low
+    Perlu_Pantauan --> Risiko_Tinggi: score >= risk_threshold_mid
+    Risiko_Tinggi --> Risiko_Kritis: score >= risk_threshold_high
+    Risiko_Kritis --> [*]: alert generated
+
+    state "Aman" as Aman
+    state "Perlu Pantauan" as Perlu_Pantauan
+    state "Risiko Tinggi" as Risiko_Tinggi
+    state "Risiko Kritis" as Risiko_Kritis
+
+    note right of Aman
+        Labels - Aman, Perlu Pantauan, Risiko Tinggi, Risiko Kritis
+    end note
+    note right of Risiko_Kritis
+        Configurable via PUT /api/config/inject
+    end note

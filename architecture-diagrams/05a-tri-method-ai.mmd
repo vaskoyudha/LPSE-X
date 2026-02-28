@@ -1,0 +1,33 @@
+flowchart TB
+    subgraph INPUT ["Input"]
+        FV["85-dim Feature Vector"]
+    end
+
+    subgraph ENGINES ["Detection Engines"]
+        IF["Isolation Forest
+        (Unsupervised)"]
+        XG["XGBoost Classifier
+        (Supervised, 4-level)"]
+        WL["ICW Weak Labels
+        (Weakly Supervised)"]
+    end
+
+    subgraph ENSEMBLE ["Decision Layer"]
+        DP["Disagreement Protocol
+        (Weighted Ensemble)"]
+    end
+
+    subgraph OUTCOMES ["Final Scoring"]
+        AG["Weighted Average Risk Score"]
+        DG["Manual Review Priority Flag"]
+    end
+
+    INPUT --> IF & XG & WL
+    IF & XG & WL --> DP
+    DP --> AG & DG
+    AG & DG --> ORT["ONNX Runtime
+    (<200ms CPU Inference)"]
+
+    subgraph EVAL ["Performance Target"]
+        T["F1: 0.85-0.92 (Westerski et al. 2021)"]
+    end

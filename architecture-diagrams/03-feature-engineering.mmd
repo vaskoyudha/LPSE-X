@@ -1,0 +1,33 @@
+flowchart TB
+    subgraph CARDINAL_ENG ["Cardinal Library (OCP)"]
+        CF["73 Red Flags"]
+        CF1["Planning Phase Flags"]
+        CF2["Tender Phase Flags"]
+        CF3["Award Phase Flags"]
+        CF4["Implementation Phase Flags"]
+        CF --> CF1 & CF2 & CF3 & CF4
+    end
+
+    subgraph CUSTOM_ENG ["12 Custom ML Features"]
+        direction TB
+        M1["Bid Clustering Score"]
+        M2["Vendor Win Concentration"]
+        M3["HPS Deviation Ratio"]
+        M4["Participant Count Anomaly"]
+        M5["Geographic Concentration"]
+        M6["Repeat Pairing Index"]
+        M7["Temporal Submission Pattern"]
+        M8["Historical Win Rate"]
+        M9["Phantom Bidder Score"]
+        M10["Benford's Law Anomaly"]
+        M11["Interlocking Directorates"]
+        M12["Bid Rotation Pattern"]
+    end
+
+    subgraph OUTPUT ["Feature Integration"]
+        FV["85-Dimensional Feature Vector"]
+    end
+
+    CARDINAL_ENG --> OUTPUT
+    CUSTOM_ENG --> OUTPUT
+    OUTPUT --> AE["Tri-Method AI Engine"]

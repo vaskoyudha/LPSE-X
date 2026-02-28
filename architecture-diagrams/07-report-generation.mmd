@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant User
+    participant FastAPI
+    participant ReportEngine
+    participant OracleSandwich
+    participant SQLite
+    participant Jinja2
+
+    User->>FastAPI: GET /api/report/{tender_id}
+    FastAPI->>ReportEngine: generate_report(tender_id, output_format)
+    ReportEngine->>SQLite: query tender metadata + award data
+    SQLite-->>ReportEngine: tender record
+    ReportEngine->>OracleSandwich: get_all_explanations(tender_id)
+    OracleSandwich-->>ReportEngine: {shap, dice, anchors, leiden, benford}
+    ReportEngine->>Jinja2: render(template="iia_2025_bahasa.html", data=explanations)
+    Note over Jinja2: Template-based NLG / Bahasa Indonesia / IIA 2025 standard
+    Jinja2-->>ReportEngine: rendered HTML/PDF
+    ReportEngine-->>FastAPI: report document
+    FastAPI-->>User: 200 OK + report

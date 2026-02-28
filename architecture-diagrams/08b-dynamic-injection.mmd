@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant Judge
+    participant FastAPI
+    participant Pydantic
+    participant ConfigManager
+    participant AuditLog
+    participant AllModules
+
+    Judge->>FastAPI: PUT /api/config/inject {procurement_scope, institution_filter, risk_threshold, year_range, anomaly_method, output_format, custom_params}
+    FastAPI->>Pydantic: validate(payload)
+    alt Invalid Parameters
+        Pydantic-->>FastAPI: ValidationError (422)
+        FastAPI-->>Judge: 422 Unprocessable Entity
+    else Valid Parameters
+        Pydantic-->>FastAPI: validated ConfigModel
+        FastAPI->>ConfigManager: apply_config(validated_config)
+        ConfigManager->>AuditLog: log_injection(timestamp, params)
+        ConfigManager->>AllModules: notify_config_updated()
+        Note over ConfigManager,AllModules: Applied instantly — no restart, no retraining required
+        ConfigManager-->>FastAPI: config_applied
+        FastAPI-->>Judge: 200 OK {applied_config, audit_id}
+    end

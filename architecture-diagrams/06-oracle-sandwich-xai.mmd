@@ -1,0 +1,21 @@
+flowchart TB
+    IN["ONNX Risk Score + Features + Graph Metrics"] --> L1
+    
+    subgraph SANDWICH ["Oracle Sandwich Layers"]
+        direction TB
+        L1["Layer 1 — GLOBAL: SHAP
+        (shap summary plots)"]
+        L2["Layer 2 — LOCAL: DiCE
+        (Counterfactuals, CACHED/ASYNC)"]
+        L3["Layer 3 — RULES: Anchors
+        (alibi if-then rules)"]
+        L4["Layer 4 — GRAPH: Leiden
+        (leidenalg network viz)"]
+        L5["Layer 5 — STATISTICAL: Benford
+        (benford_py χ² distribution)"]
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5
+    L5 --> OUT["Structured XAI Output"]
+
+    style SANDWICH fill:#fce4ec,stroke:#880e4f

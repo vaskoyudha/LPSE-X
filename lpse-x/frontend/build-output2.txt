@@ -1,0 +1,12 @@
+
+> lpse-x-frontend@0.1.0 build
+> tsc -b && vite build
+
+[36mvite v6.0.5 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 37 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:  0.27 kB[22m
+[2mdist/[22m[36massets/index-Q2H8vS7A.js  [39m[1m[2m167.80 kB[22m[1m[22m[2m │ gzip: 54.77 kB[22m
+[32m✓ built in 1.20s[39m

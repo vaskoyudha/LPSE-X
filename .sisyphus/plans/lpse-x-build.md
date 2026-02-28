@@ -331,7 +331,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Files: `lpse-x/`, `pyproject.toml`, `package.json`, `Makefile`
   - Pre-commit: `python -c "import fastapi; print('ok')"`
 
-- [ ] 2. TypeScript Types + Pydantic Schemas + Shared Contracts
+ [x] 2. TypeScript Types + Pydantic Schemas + Shared Contracts
 
   **What to do**:
   - Define Pydantic models in `backend/schemas/`:
@@ -427,7 +427,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Message: `feat(types): Pydantic schemas + TypeScript interfaces for all contracts`
   - Files: `backend/schemas/`, `frontend/src/types/`
 
-- [ ] 3. Data Pipeline — opentender.net Ingestion + SQLite Storage
+ [x] 3. Data Pipeline — opentender.net Ingestion + SQLite Storage
 
   **What to do**:
   - Create `backend/data/ingestion.py`:
@@ -542,7 +542,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Message: `feat(data): opentender.net ingestion pipeline + SQLite storage + NPWP anonymization`
   - Files: `backend/data/`, `data/lpse_x.db`
 
-- [ ] 4. Runtime Config System (YAML + Pydantic + Injection Endpoint)
+ [x] 4. Runtime Config System (YAML + Pydantic + Injection Endpoint)
 
   **What to do**:
   - Create `backend/config/runtime.py`:
@@ -651,7 +651,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Files: `backend/config/`, `config/runtime_config.yaml`
 ---
 
-- [ ] 5. React App Scaffold + Routing + Design System Tokens
+ [x] 5. React App Scaffold + Routing + Design System Tokens
 
   **What to do**:
   - Initialize Vite + React + TypeScript project in `frontend/`
@@ -727,7 +727,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Files: `frontend/`
   - Pre-commit: `npm run build`
 
-- [ ] 6. Feature Engineering — 73 OCP Red Flags (Cardinal) + 12 Custom Forensic ML Features
+ [x] 6. Feature Engineering — 73 OCP Red Flags (Cardinal) + 12 Custom Forensic ML Features
 
   **What to do**:
   - Create `backend/features/cardinal_flags.py`:
@@ -895,7 +895,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Files: `backend/features/`
   - Pre-commit: `pytest tests/test_features.py -q`
 
-- [ ] 7. Graph Construction + Leiden Cartel Detection Module
+- [x] 7. Graph Construction + Leiden Cartel Detection Module
 
   **What to do**:
   - Create `backend/graph/builder.py`:
@@ -1062,7 +1062,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Pre-commit: `pytest tests/test_graph.py -q`
 
 
-### Task 8 — Tri-Method AI: Isolation Forest + XGBoost + ICW Weak Labels + Disagreement Protocol
+### [x] Task 8 — Tri-Method AI: Isolation Forest + XGBoost + ICW Weak Labels + Disagreement Protocol
 - **Wave**: 2 (parallel group B)
 - **Depends on**: T2 (types), T6 (features)
 - **Blocks**: T10 (SHAP+Anchors), T11 (ONNX export), T12 (DiCE), T14 (API)
@@ -1249,7 +1249,7 @@ Max Concurrent: 5 (Waves 1, 2, 4)
   - Pre-commit: `pytest tests/test_models.py -q`
 
 
-### Task 9 — Benford's Law Analysis Module with Applicability Gating
+ [x] Task 9 — Benford's Law Analysis Module with Applicability Gating
 - **Wave**: 2 (parallel group B)
 - **Depends on**: T6 (features)
 - **Blocks**: T10 (SHAP+Anchors), T14 (API)

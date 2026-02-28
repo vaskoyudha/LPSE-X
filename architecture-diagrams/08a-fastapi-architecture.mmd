@@ -1,0 +1,34 @@
+flowchart LR
+    subgraph CLIENT ["Client"]
+        RF["React Frontend"]
+        JD["Judge"]
+    end
+
+    subgraph ROUTER ["FastAPI Router"]
+        direction TB
+        C_GRP["Config: PUT /api/config/inject"]
+        D_GRP["Data: GET /api/tenders"]
+        A_GRP["Analysis: GET /api/risk/{id}, /api/explain/{id}"]
+        N_GRP["Network: GET /api/network"]
+        R_GRP["Report: GET /api/report/{id}"]
+        V_GRP["Viz: GET /api/heatmap"]
+        H_GRP["Health: GET /api/health"]
+    end
+
+    subgraph MODULES ["Backend Modules"]
+        CM["ConfigManager"]
+        TR["TenderRepository"]
+        RE["RiskEngine"]
+        OS["OracleSandwich"]
+        GE["GraphEngine"]
+        RG["ReportEngine"]
+        HB["HeatmapBuilder"]
+    end
+
+    RF & JD --> ROUTER
+    C_GRP --> CM
+    D_GRP --> TR
+    A_GRP --> RE & OS
+    N_GRP --> GE
+    R_GRP --> RG
+    V_GRP --> HB

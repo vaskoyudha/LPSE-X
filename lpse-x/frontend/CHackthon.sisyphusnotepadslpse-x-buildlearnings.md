@@ -1,0 +1,4 @@
+- React Router v6 setup with `<BrowserRouter>` and `<Routes>` is clean and works perfectly with nested layout.
+- Added Tailwind CSS v4-compatible `tailwind.config.ts` exporting explicit required risk colors (`aman`, `pantauan`, `tinggi`, `kritis`) via `theme.extend.colors`.
+- The `api/client.ts` ensures typed API responses mapping perfectly to shared types, handling proxies gracefully. 
+- TypeScript `/// <reference types="vite/client" />` directive is necessary for Vite's `import.meta.env` to compile without errors when no custom `vite-env.d.ts` is available.

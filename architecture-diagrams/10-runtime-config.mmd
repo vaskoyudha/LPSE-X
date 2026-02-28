@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant YAML_File
+    participant Pydantic
+    participant ConfigManager
+    participant FeatureEng
+    participant GraphEngine
+    participant TriMethodAI
+    participant OracleSandwich
+    participant ReportGen
+    participant FastAPI
+
+    Note over FastAPI,YAML_File: Part A: Startup Initialization
+    FastAPI->>YAML_File: load runtime_config.yaml
+    YAML_File-->>FastAPI: raw config dict
+    FastAPI->>Pydantic: ConfigModel.parse(raw_config)
+    Pydantic-->>FastAPI: validated ConfigModel
+    FastAPI->>ConfigManager: initialize_singleton(config)
+    ConfigManager->>FeatureEng: set_config(procurement_scope, institution_filter, year_range)
+    ConfigManager->>GraphEngine: set_config(year_range, institution_filter)
+    ConfigManager->>TriMethodAI: set_config(anomaly_method, risk_threshold)
+    ConfigManager->>OracleSandwich: set_config(risk_threshold)
+    ConfigManager->>ReportGen: set_config(output_format)
+
+    Note over FastAPI,ConfigManager: Part B: Live Injection
+    FastAPI->>FastAPI: Judge calls PUT /api/config/inject
+    FastAPI->>Pydantic: re-validate(new_params)
+    Pydantic-->>FastAPI: validated
+    FastAPI->>ConfigManager: update_config(validated_params)
+    Note over ConfigManager: Update in-place (thread-safe)
+    ConfigManager-->>FastAPI: updated
+    FastAPI-->>FastAPI: Applied instantly — no restart, no retraining

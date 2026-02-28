@@ -1,0 +1,36 @@
+flowchart TB
+    SPA["React SPA (Vite build)"] --> API["FastAPI Backend REST API"]
+
+    subgraph OUTPUT_1 ["Risk Score Dashboard"]
+        D1["Plotly bar/pie charts"]
+        D2["4-level color coding"]
+        D3["Sortable Risk Tender list"]
+    end
+
+    subgraph OUTPUT_2 ["Oracle Sandwich Explanation Panel"]
+        X1["SHAP waterfall chart"]
+        X2["DiCE counterfactual table"]
+        X3["Anchors if-then rules"]
+        X4["Leiden graph snippet"]
+        X5["Benford distribution chart"]
+    end
+
+    subgraph OUTPUT_3 ["Geographic Risk Heatmap"]
+        H1["Folium/Leaflet map"]
+        H2["Institution markers"]
+        H3["Offline tile fallback"]
+    end
+
+    subgraph OUTPUT_4 ["Cartel Network Graph"]
+        G1["Interactive force graph"]
+        G2["Leiden community colors"]
+        G3["Vendor sizing by win_count"]
+    end
+
+    subgraph OUTPUT_5 ["Pre-Investigation Report Viewer"]
+        R1["Bahasa Indonesia report"]
+        R2["IIA 2025 sections"]
+        R3["Download PDF button"]
+    end
+
+    SPA --> OUTPUT_1 & OUTPUT_2 & OUTPUT_3 & OUTPUT_4 & OUTPUT_5

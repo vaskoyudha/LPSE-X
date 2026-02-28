@@ -1,0 +1,44 @@
+flowchart LR
+    subgraph SOURCES ["Data Sources"]
+        OT["opentender.net (ICW)
+        - 1,106,096 tenders
+        - OCDS Format
+        - /api/tender/export/"]
+        PY["pyproc
+        - Real-time LPSE
+        - Rate 1 req/2s
+        - Exp. Backoff"]
+        SIR["LKPP SiRUP
+        - CKAN API
+        - 26 Datasets
+        - 631+ K/L/PD"]
+        COR["Corruption Cases
+        - 200+ Curated
+        - ground truth labels"]
+    end
+
+    subgraph PIPELINE ["Ingestion Pipeline"]
+        direction TB
+        S1["Async Fetcher
+        (httpx + aiofiles)"]
+        S2["OCDS Validator
+        (Pydantic BaseModel)"]
+        S3["Data Cleaner
+        (Median Imputation)"]
+        S4["Privacy Compliance
+        (NPWP SHA-256 Hash)"]
+        S5["SQLite Bulk Insert
+        (aiosqlite)"]
+    end
+
+    subgraph TABLES ["SQLite Tables"]
+        T1["tenders"]
+        T2["vendors"]
+        T3["awards"]
+        T4["corruption_cases"]
+        T5["vendor_network_edges"]
+    end
+
+    OT & PY & SIR & COR --> S1
+    S1 --> S2 --> S3 --> S4 --> S5
+    S5 --> T1 & T2 & T3 & T4 & T5

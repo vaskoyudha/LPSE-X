@@ -1,0 +1,26 @@
+classDiagram
+    class Vendor {
+        +String npwp_hash
+        +String name
+        +String region
+        +int win_count
+    }
+    class Tender {
+        +String id
+        +String ocid
+        +String buyer
+        +float hps
+        +float contract_value
+    }
+    class Bid {
+        +float amount
+        +DateTime submission_time
+    }
+    class Community {
+        +int id
+        +int member_count
+        +float risk_score
+    }
+
+    Vendor "1..*" -- "1..*" Tender : participates via Bid
+    Community "1" -- "1..*" Vendor : contains

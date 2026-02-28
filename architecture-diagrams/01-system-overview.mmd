@@ -1,0 +1,108 @@
+flowchart TB
+    subgraph DATA_SOURCES ["Data Sources"]
+        DS1["opentender.net (ICW)"]
+        DS2["pyproc (LPSE real-time)"]
+        DS3["LKPP Open Data (SiRUP)"]
+        DS4["Corruption Cases"]
+    end
+
+    subgraph INGESTION ["Ingestion Pipeline"]
+        AF["Async Fetcher"]
+        OV["OCDS Validator"]
+        DC["Data Cleaner"]
+        SL["SQLite Loader"]
+    end
+
+    subgraph STORAGE ["Storage Layer"]
+        DB[("SQLite Database")]
+    end
+
+    subgraph FEATURE_ENG ["Feature Engineering"]
+        CRD["Cardinal (73 Red Flags)"]
+        CST["12 Custom ML Features"]
+        FV["85-dim Feature Vector"]
+    end
+
+    subgraph GRAPH_ENGINE ["Graph Engine"]
+        NX["NetworkX Bipartite Graph"]
+        LA["Leiden (leidenalg)"]
+        GM["Graph Metrics"]
+    end
+
+    subgraph TRI_METHOD ["Tri-Method AI Engine"]
+        IF["Isolation Forest (Unsupervised)"]
+        XG["XGBoost (Supervised)"]
+        WL["ICW Weak Labels"]
+        DP["Disagreement Protocol"]
+        ORT["ONNX Runtime"]
+    end
+
+    subgraph ORACLE_XAI ["Oracle Sandwich XAI"]
+        L1["SHAP (Global)"]
+        L2["DiCE (Local)"]
+        L3["Anchors (Rules)"]
+        L4["Leiden (Graph)"]
+        L5["Benford (Statistical)"]
+    end
+
+    subgraph REPORT_GEN ["Report Generation"]
+        JN["Jinja2 NLG"]
+        STD["IIA 2025 Standards"]
+        BI["Bahasa Indonesia"]
+    end
+
+    subgraph API_LAYER ["API Layer (FastAPI)"]
+        UV["Uvicorn ASGI"]
+        INJ["PUT /api/config/inject"]
+        ENDP["All Endpoints"]
+    end
+
+    subgraph FRONTEND ["Frontend Layer (React)"]
+        SPA["React SPA"]
+        PLT["Plotly Charts"]
+        FOL["Folium Maps"]
+        OUT["5 Output Components"]
+    end
+
+    subgraph CONFIG ["Configuration Manager"]
+        CM["ConfigManager Singleton"]
+        YAML["runtime_config.yaml"]
+    end
+
+    %% Data Flow
+    DS1 & DS2 & DS3 & DS4 --> AF
+    AF --> OV --> DC --> SL --> DB
+    DB --> FEATURE_ENG & GRAPH_ENGINE
+    FEATURE_ENG --> TRI_METHOD
+    GRAPH_ENGINE --> ORACLE_XAI
+    TRI_METHOD --> ORACLE_XAI
+    ORACLE_XAI --> REPORT_GEN
+    REPORT_GEN --> API_LAYER
+    API_LAYER --> FRONTEND
+
+    %% Config Flow
+    CM -.-> FEATURE_ENG
+    CM -.-> GRAPH_ENGINE
+    CM -.-> TRI_METHOD
+    CM -.-> ORACLE_XAI
+    CM -.-> REPORT_GEN
+    CM -.-> API_LAYER
+
+    %% Styling
+    classDef sources fill:#e1f5fe,stroke:#01579b
+    classDef processing fill:#e8f5e9,stroke:#1b5e20
+    classDef storage fill:#fff3e0,stroke:#e65100
+    classDef ai fill:#f3e5f5,stroke:#4a148c
+    classDef xai fill:#fce4ec,stroke:#880e4f
+    classDef api fill:#e0f7fa,stroke:#006064
+    classDef frontend fill:#e8eaf6,stroke:#1a237e
+    classDef config fill:#fffde7,stroke:#f57f17
+
+    class DS1,DS2,DS3,DS4 sources
+    class AF,OV,DC,SL,CRD,CST,FV,NX,LA,GM processing
+    class DB storage
+    class IF,XG,WL,DP,ORT ai
+    class L1,L2,L3,L4,L5 xai
+    class API_LAYER,UV,INJ,ENDP api
+    class FRONTEND,SPA,PLT,FOL,OUT frontend
+    class CONFIG,CM,YAML config

@@ -1,0 +1,15 @@
+{
+  "mcp": {
+    "mermaid": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-mermaid"
+      ],
+      "env": {
+        "MERMAID_THEME": "default"
+      }
+    }
+  }
+}

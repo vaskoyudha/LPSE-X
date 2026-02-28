@@ -1,0 +1,15 @@
+flowchart LR
+    DB[("SQLite Database")] --> NX["NetworkX Bipartite Graph
+    (Vendor ↔ Tender)"]
+    NX --> LA["Leiden Community Detection
+    (leidenalg library)"]
+    LA --> CI["Cartel Clusters Identified"]
+    CI --> GM["Graph Metrics
+    (Degree, Betweenness)"]
+    GM --> OS["Oracle Sandwich Layer 4"]
+
+    style CI fill:#fce4ec,stroke:#880e4f
+    subgraph NOTE ["Validation"]
+        V["Validated by Imhof et al. (2025):
+        GAT 91% accuracy across 13 markets"]
+    end
