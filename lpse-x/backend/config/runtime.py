@@ -88,8 +88,11 @@ def inject_config(updates: dict[str, Any]) -> tuple[dict, dict, list[str]]:
     """Apply partial update. Returns (old_values, new_values, errors)."""
     global _config
     errors = []
+    # Ensure config is initialized BEFORE acquiring the lock to avoid deadlock.
+    # get_config() also acquires _config_lock on first call.
+    get_config()
     with _config_lock:
-        current = get_config()
+        current = _config  # _config guaranteed non-None at this point
         old_values = current.model_dump()
         # Merge updates into current
         merged = old_values.copy()

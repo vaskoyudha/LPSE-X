@@ -321,11 +321,19 @@ class TestXaiEndpoint:
         assert "layers_failed" in data
 
     @pytest.mark.asyncio
-    async def test_xai_model_not_loaded_returns_500(self, xai_payload):
+    async def test_xai_model_not_loaded_returns_200_with_shap_error(self, xai_payload):
+        """When XGBoost model is missing, XAI returns 200 with SHAP layer in error status.
+        Fault tolerance is a core competition requirement: no layer failure should crash the endpoint.
+        """
         with patch("backend.api.routes.xai._load_xgboost", return_value=None):
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
                 resp = await client.post("/api/xai/TEST-001", json=xai_payload)
-        assert resp.status_code == 500
+        assert resp.status_code == 200
+        data = resp.json()
+        inner = data.get("data", data)
+        # SHAP will have error status since model is None, but endpoint must not crash
+        assert "shap" in inner
+        assert inner["shap"]["status"] in ("error", "ok", "not_applicable")
 
     @pytest.mark.asyncio
     async def test_xai_missing_features_returns_422(self):

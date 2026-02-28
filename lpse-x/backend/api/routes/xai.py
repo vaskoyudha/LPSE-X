@@ -93,9 +93,7 @@ async def get_xai_explanation(tender_id: str, request: XaiRequest) -> dict:
     to pre-generate counterfactuals asynchronously.
     """
     try:
-        model = _load_xgboost()
-        if model is None:
-            raise ValueError("XGBoost model not loaded — run training first")
+        model = _load_xgboost()  # may be None — each layer handles it gracefully
 
         # Build single-row DataFrame
         row = {k: float(v) if isinstance(v, (int, float)) else 0.0
