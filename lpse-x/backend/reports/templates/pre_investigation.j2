@@ -1,0 +1,172 @@
+================================================================================
+LAPORAN PRA-INVESTIGASI PENGADAAN BARANG/JASA PEMERINTAH
+Standar IIA 2025 — Pemeriksaan Berbasis Risiko
+================================================================================
+Nomor Referensi : LPSE-X-{{ tender_id }}-{{ generated_at[:10] }}
+Dibuat Oleh     : Sistem LPSE-X (Explainable AI Forensic Analytics)
+Tanggal         : {{ generated_at[:10] }}
+Pukul           : {{ generated_at[11:19] }} WIB
+================================================================================
+
+================================================================================
+BAGIAN 1 — RINGKASAN EKSEKUTIF
+================================================================================
+
+Tender dengan ID **{{ tender_id }}** telah dianalisis oleh sistem LPSE-X
+menggunakan pendekatan multi-lapisan kecerdasan buatan yang dapat dijelaskan
+(Explainable AI). Hasil analisis menunjukkan tingkat risiko sebagai berikut:
+
+  Skor Risiko   : {{ risk_score }}/3
+  Tingkat Risiko: {{ risk_level | upper }}
+  Rekomendasi   : {% if risk_score >= 3 %}SEGERA SELIDIKI{% elif risk_score >= 2 %}TINDAK LANJUTI{% elif risk_score >= 1 %}PANTAU BERKALA{% else %}TIDAK ADA TINDAKAN MENDESAK{% endif %}
+
+{{ risk_narrative }}
+
+Laporan ini dihasilkan secara otomatis berdasarkan analisis data kuantitatif.
+Temuan ini bersifat indikatif dan harus dikonfirmasi oleh auditor manusia
+sebelum diambil tindakan hukum.
+
+================================================================================
+BAGIAN 2 — IDENTITAS PENGADAAN
+================================================================================
+
+{% if tender_data %}
+  ID Tender          : {{ tender_data.get('tender_id', tender_id) }}
+  Nama Paket         : {{ tender_data.get('nama_paket', 'Tidak Tersedia') }}
+  Satuan Kerja       : {{ tender_data.get('satuan_kerja', 'Tidak Tersedia') }}
+  Kategori Pengadaan : {{ tender_data.get('kategori', 'Tidak Tersedia') }}
+  Metode Pengadaan   : {{ tender_data.get('metode', 'Tidak Tersedia') }}
+  Nilai HPS (Rp)     : {{ tender_data.get('nilai_hps', 'Tidak Tersedia') }}
+  Nilai Kontrak (Rp) : {{ tender_data.get('nilai_kontrak', 'Tidak Tersedia') }}
+  Jumlah Peserta     : {{ tender_data.get('jumlah_peserta', 'Tidak Tersedia') }}
+  Pemenang Tender    : {{ tender_data.get('pemenang', 'Tidak Tersedia') }}
+  Tahun Anggaran     : {{ tender_data.get('tahun_anggaran', 'Tidak Tersedia') }}
+{% else %}
+  Data identitas pengadaan tidak tersedia untuk tender ini.
+{% endif %}
+
+================================================================================
+BAGIAN 3 — INDIKATOR RISIKO (ANALISIS SHAP)
+================================================================================
+
+Analisis SHAP (SHapley Additive exPlanations) mengidentifikasi kontribusi
+setiap fitur terhadap skor risiko akhir. Fitur dengan nilai SHAP positif
+meningkatkan risiko, sedangkan nilai negatif mengurangi risiko.
+
+Status SHAP: {{ shap_status | upper }}
+{% if shap_ok %}
+
+Fitur Pendorong Risiko Utama (Top Risk Drivers):
+{% for feat in top_risk_features %}
+  {{ loop.index }}. {{ feat.name }}
+     Nilai Fitur  : {{ feat.value }}
+     Kontribusi   : +{{ "%.4f" | format(feat.shap | abs) }} (meningkatkan risiko)
+     Interpretasi : {{ feat.interpretation }}
+{% endfor %}
+
+{% if top_safe_features %}
+Fitur Penurun Risiko (Risk Reducers):
+{% for feat in top_safe_features %}
+  {{ loop.index }}. {{ feat.name }}
+     Nilai Fitur  : {{ feat.value }}
+     Kontribusi   : -{{ "%.4f" | format(feat.shap | abs) }} (menurunkan risiko)
+{% endfor %}
+{% endif %}
+
+Nilai SHAP Dasar (Base Value) : {{ "%.4f" | format(shap_base_value) }}
+Output Model                  : {{ "%.4f" | format(shap_model_output) }}
+Error Additivitas              : {{ "%.6f" | format(shap_additivity_error) }} (harus < 0.01)
+{% else %}
+  Analisis SHAP tidak tersedia: {{ shap_error }}
+{% endif %}
+
+================================================================================
+BAGIAN 4 — MATRIKS BUKTI
+================================================================================
+
+Tabel ini menunjukkan keselarasan temuan dari tiga metode analisis independen.
+Keselarasan tinggi (3/3) mengindikasikan risiko yang lebih dapat diandalkan.
+
+  Metode              | Status           | Temuan Kunci
+  --------------------|------------------|------------------------------------------
+  SHAP (XAI)          | {{ shap_status | upper }} | {{ shap_summary | truncate(40, True) }}
+  Hukum Benford       | {{ benford_status | upper }} | {{ benford_summary | truncate(40, True) }}
+  Graf Komunitas      | {{ leiden_status | upper }} | {{ leiden_summary | truncate(40, True) }}
+
+Skor Keselarasan Bukti: {{ evidence_alignment }}/3 metode mengindikasikan risiko
+
+{% if anchors_status == 'ok' %}
+Aturan Jangkar (Anchor Rules) — Kondisi Minimal yang Mendorong Prediksi Ini:
+{% for rule in anchor_rules %}
+  - {{ rule }}
+{% endfor %}
+  Presisi Aturan: {{ "%.1f%%" | format(anchor_precision * 100) }}
+  Cakupan Aturan: {{ "%.1f%%" | format(anchor_coverage * 100) }}
+{% endif %}
+
+{{ evidence_narrative }}
+
+================================================================================
+BAGIAN 5 — ANALISIS SKENARIO WHAT-IF (COUNTERFACTUAL DiCE)
+================================================================================
+
+Analisis kontrafaktual menunjukkan perubahan minimal yang diperlukan agar
+tender ini bergerak dari kategori berisiko ke kategori aman.
+
+Status DiCE: {{ dice_status | upper }}
+{% if dice_ok %}
+  {% if dice_from_cache %}
+  (Catatan: Hasil berasal dari cache template terdekat)
+  {% endif %}
+
+Jumlah Skenario      : {{ dice_cf_count }}
+Waktu Generasi       : {{ "%.0f" | format(dice_generation_time_ms) }} ms
+
+{% for cf in dice_counterfactuals %}
+--- Skenario {{ loop.index }} (Target Risiko: {{ cf.risk_label }}) ---
+{% if cf.changes %}
+  Perubahan yang Diperlukan:
+{% for change in cf.changes %}
+  • {{ change.feature }}: {{ change.from_val }} → {{ change.to_val }}
+    ({{ change.direction | capitalize }}, delta={{ change.delta }})
+{% endfor %}
+{% else %}
+  (Tidak ada perubahan fitur yang terdeteksi dalam skenario ini)
+{% endif %}
+{% endfor %}
+{% elif dice_not_applicable %}
+  Analisis What-If belum tersedia untuk tender ini.
+  Jalankan endpoint /api/xai/dice/precompute untuk men-generate skenario.
+{% else %}
+  Analisis What-If tidak tersedia: {{ dice_error }}
+{% endif %}
+
+================================================================================
+BAGIAN 6 — KESIMPULAN DAN REKOMENDASI
+================================================================================
+
+KESIMPULAN:
+{{ conclusion_text }}
+
+REKOMENDASI:
+{% for rec in recommendations %}
+  {{ loop.index }}. {{ rec }}
+{% endfor %}
+
+CATATAN METODOLOGI:
+  - Model: Ensemble XGBoost + Isolation Forest (Tri-Method AI)
+  - Threshold Risiko: {{ risk_threshold }}
+  - Metode Anomali: {{ anomaly_method }}
+  - Cakupan Pengadaan: {{ procurement_scope }}
+  - Semua parameter dapat diinjeksi secara dinamis via runtime_config.yaml
+
+PERINGATAN HUKUM:
+  Laporan ini dihasilkan oleh sistem kecerdasan buatan dan bersifat indikatif.
+  Setiap tindakan hukum atau administratif HARUS didasarkan pada verifikasi
+  independen oleh auditor bersertifikat. Sistem ini tidak menggantikan
+  penilaian profesional auditor manusia.
+
+================================================================================
+— AKHIR LAPORAN —
+LPSE-X Explainable Forensic Analytics | Find IT! 2026 UGM | Track C: XAI
+================================================================================
