@@ -5,10 +5,10 @@
 
 import {
   GraphCommunity,
-  InvestigationReport,
+  ReportResult,
   RiskPrediction,
   TenderRecord,
-  XAIExplanation,
+  OracleSandwichResult,
 } from "./models";
 
 /**
@@ -45,7 +45,7 @@ export interface PaginatedResponse<T> {
 export interface TenderWithPrediction {
   tender: TenderRecord;
   prediction: RiskPrediction;
-  explanation?: XAIExplanation;
+  explanation?: OracleSandwichResult;
 }
 
 /**
@@ -84,7 +84,7 @@ export interface ReportGenerationResponse {
   report_id: string;
   tender_id: string;
   status: "generated" | "queued" | "failed";
-  report?: InvestigationReport;
+  report?: ReportResult;
   error?: string;
 }
 

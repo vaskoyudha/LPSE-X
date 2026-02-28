@@ -7,14 +7,15 @@ export type {
   GraphCommunity,
   InjectionRequest,
   InjectionResponse,
-  InvestigationReport,
+  OracleSandwichResult,
   OutputFormat,
   ProcurementScope,
   RiskLevel,
   RiskPrediction,
   RuntimeConfig,
   TenderRecord,
-  XAIExplanation,
+  XAILayer,
+  ReportResult,
 } from "./models";
 
 export type {
