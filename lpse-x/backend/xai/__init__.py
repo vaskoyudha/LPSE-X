@@ -23,7 +23,11 @@ from backend.xai.oracle_sandwich import (
     LayerResult,
     explain_tender,
 )
-
+from backend.xai.dice_explainer import (
+    CounterfactualResult,
+    DiceExplainer,
+)
+from backend.xai.dice_cache import DiceCacheManager
 __all__ = [
     "ShapGlobalResult",
     "ShapLocalResult",
@@ -34,4 +38,7 @@ __all__ = [
     "OracleSandwichResult",
     "LayerResult",
     "explain_tender",
+    "CounterfactualResult",
+    "DiceExplainer",
+    "DiceCacheManager",
 ]
