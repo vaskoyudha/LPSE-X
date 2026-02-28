@@ -17,6 +17,9 @@ Design rules (from AGENTS.md):
 """
 from __future__ import annotations
 
+
+import pathlib
+
 import logging
 import socket
 
@@ -69,6 +72,18 @@ app.include_router(reports.router)          # /api/reports/{id} GET/POST
 
 
 # ---------------------------------------------------------------------------
+# Static frontend — serve dist/ if built (offline-capable single-process mode)
+# ---------------------------------------------------------------------------
+
+_DIST_DIR = pathlib.Path(__file__).parent.parent / "frontend" / "dist"
+if _DIST_DIR.exists():
+    from fastapi.staticfiles import StaticFiles
+    # Mount AFTER all /api routes so they take priority
+    app.mount("/", StaticFiles(directory=str(_DIST_DIR), html=True), name="frontend")
+    logger.info("Serving frontend from %s", _DIST_DIR)
+
+
+# ---------------------------------------------------------------------------
 # Port auto-detection — never hardcode port numbers (AGENTS.md rule)
 # ---------------------------------------------------------------------------
 
@@ -99,7 +114,9 @@ if __name__ == "__main__":
     )
     port = find_free_port()
     logger.info("Starting LPSE-X API on port %d", port)
-    print(f"🚀 LPSE-X API starting on http://0.0.0.0:{port}")
-    print(f"   Docs:    http://localhost:{port}/docs")
-    print(f"   ReDoc:   http://localhost:{port}/redoc")
+    print(f"🚀 LPSE-X starting on http://localhost:{port}")
+    print(f"   App:     http://localhost:{port}/")
+    print(f"   API:     http://localhost:{port}/docs")
+    if _DIST_DIR.exists():
+        print(f"   (Frontend served from {_DIST_DIR})")
     uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=False)
