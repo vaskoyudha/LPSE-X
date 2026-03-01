@@ -1,0 +1,31 @@
+=== T20 Auto Port Detection Evidence ===
+
+Checking auto-port detection implementation...
+11:  - /api/reports/{id}  (GET/POST)    — IIA 2025-format report generation
+14:  - No fixed port numbers — auto-detect with find_free_port()
+18:from __future__ import annotations
+21:import pathlib
+23:import logging
+24:import socket
+26:import uvicorn
+27:from fastapi import FastAPI
+28:from fastapi.middleware.cors import CORSMiddleware
+30:from backend.config import config_router
+31:from backend.api.routes import health, inference, xai, graph, reports
+71:app.include_router(reports.router)          # /api/reports/{id} GET/POST
+80:    from fastapi.staticfiles import StaticFiles
+87:# Port auto-detection — never hardcode port numbers (AGENTS.md rule)
+90:def find_free_port(start: int = 8000) -> int:
+92:    Auto-detect a free TCP port starting from `start`.
+93:    Scans 8000–8099 and returns the first available port.
+94:    Raises RuntimeError if all ports in range are occupied.
+96:    for port in range(start, start + 100):
+97:        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+
+=== --no-browser flag support ===
+
+=== --port override flag ===
+
+=== SPA routing fallback (GET /dashboard → index.html) ===
+80:    from fastapi.staticfiles import StaticFiles
+82:    app.mount("/", StaticFiles(directory=str(_DIST_DIR), html=True), name="frontend")

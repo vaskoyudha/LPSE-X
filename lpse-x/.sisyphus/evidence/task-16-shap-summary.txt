@@ -1,0 +1,13 @@
+=== T16 XAI Visualization Components ===
+
+frontend/src/components/xai/ShapSummaryPlot.tsx: MISSING
+frontend/src/components/xai/ShapWaterfallPlot.tsx: MISSING
+frontend/src/components/xai/DiceCounterfactual.tsx: MISSING
+frontend/src/components/xai/AnchorRules.tsx: MISSING
+frontend/src/components/xai/XaiPanel.tsx: MISSING
+
+--- Plotly in XAI ---
+(not found)
+
+--- Tab states ---
+(not found)

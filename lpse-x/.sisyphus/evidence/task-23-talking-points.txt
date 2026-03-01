@@ -1,0 +1,27 @@
+=== TALKING_POINTS.md Q&A check ===
+File exists: YES
+Line count: 159
+
+=== Q&A count ===
+16
+
+=== Q&A entries ===
+125:**Q1: "Bagaimana sistem menangani masalah cold-start / tidak ada label fraud?"**
+128:**Q2: "Kenapa tidak pakai deep learning / transformer?"**
+131:**Q3: "Apa bedanya LPSE-X dengan opentender.net?"**
+134:**Q4: "Apakah sistem ini bisa scale ke seluruh 1.1 juta tender?"**
+137:**Q5: "Bagaimana menangani false positive?"**
+140:**Q6: "Bagaimana dynamic injection diimplementasikan secara teknis?"**
+143:**Q7: "Bagaimana jika vendor mengubah pola kecurangan mereka?"**
+146:**Q8: "Apakah laporan ini legally defensible?"**
+149:**Q9: "Apa concern privasi dari sistem ini?"**
+152:**Q10: "Apa roadmap deployment ke production?"**
+155:**Q11: "Kenapa pakai SQLite, bukan PostgreSQL?"**
+158:**Q12: "Bagaimana akurasi model?"**
+
+=== Competitive differentiation table ===
+
+=== Weakness acknowledgments ===
+
+=== Key statistics present ===
+126:> ICW Indonesia mempublikasikan daftar 364 kasus pengadaan bermasalah (2024) — ini menjadi *weak labels* untuk XGBoost. Isolation Forest beroperasi *unsupervised* — tidak perlu label sama sekali. Ketidaksepakatan antara dua model dijadikan sinyal "Perlu Review Manual". Sistem dapat bekerja bahkan dengan 0 labeled samples.

@@ -1,0 +1,57 @@
+=== Mini dataset validation ===
+tests/fixtures/mini_tenders.json exists: YES
+total 24K
+-rw-r--r-- 1 vasco 197609 23K Feb 28 13:41 mini_tenders.json
+
+=== conftest.py exists ===
+YES
+
+=== Integration test fixture coverage ===
+44:def mini_tenders() -> list[dict]:
+46:    with open(FIXTURES_DIR / "mini_tenders.json", encoding="utf-8") as f:
+53:def mini_db(mini_tenders: list[dict], tmp_path_factory: pytest.TempPathFactory) -> str:
+87:    for t in mini_tenders:
+118:def app_client() -> Generator[TestClient, None, None]:
+130:def runtime_config() -> dict:
+
+=== Test data summary ===
+C:\Hackthon\lpse-x\.venv\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.6.0
+rootdir: C:\Hackthon\lpse-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.25.0, cov-6.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None
+collected 36 items
+
+<Package lpse-x>
+  <Package tests>
+    <Module test_integration.py>
+      <Function test_api_health>
+      <Function test_api_health_has_version>
+      <Function test_api_health_has_config>
+      <Function test_api_predict_high_risk>
+      <Function test_api_predict_returns_score>
+      <Function test_api_predict_clean_tender>
+      <Function test_api_predict_minimal_features>
+      <Function test_api_predict_has_disagreement_flag>
+      <Function test_api_predict_individual_scores>
+      <Function test_api_xai_returns_200>
+      <Function test_api_xai_has_all_five_layers>
+      <Function test_api_xai_layers_have_status>
+      <Function test_api_xai_partial_failure_still_returns_200>
+      <Function test_api_xai_with_amount_values_for_benford>
+      <Function test_api_graph_returns_200>
+      <Function test_api_graph_has_communities_key>
+      <Function test_api_graph_has_status>
+      <Function test_api_graph_accepts_filters>
+      <Function test_api_report_get_returns_200>
+      <Function test_api_report_post_returns_200>
+      <Function test_api_report_has_report_text>
+      <Function test_api_report_with_oracle_result>
+      <Function test_api_report_has_risk_level>
+      <Function test_api_inject_valid>
+      <Function test_api_inject_invalid_threshold>

@@ -1,0 +1,47 @@
+=== T20 Relocated Bundle Test ===
+Verifying all paths are relative (no hardcoded absolute paths in critical files)...
+
+--- backend/main.py path references ---
+51:# CORS — open for local React frontend
+75:# Static frontend — serve dist/ if built (offline-capable single-process mode)
+78:_DIST_DIR = pathlib.Path(__file__).parent.parent / "frontend" / "dist"
+82:    app.mount("/", StaticFiles(directory=str(_DIST_DIR), html=True), name="frontend")
+83:    logger.info("Serving frontend from %s", _DIST_DIR)
+
+--- config/runtime_config.yaml ---
+# LPSE-X Runtime Configuration
+# All parameters below are injectable via PUT /api/config/inject
+# Changes apply INSTANTLY without server restart
+
+# Procurement category filter (konstruksi/barang/jasa_konsultansi/jasa_lainnya)
+procurement_scope: "konstruksi"
+
+# Institution whitelist (empty = all 5 LPSE institutions)
+institution_filter: []
+
+# Risk score threshold 0.0-1.0 (tenders above this are flagged)
+risk_threshold: 0.65
+
+# Analysis year range
+year_range:
+  start: 2022
+  end: 2024
+
+# Detection method (isolation_forest/xgboost/ensemble)
+anomaly_method: "ensemble"
+
+# Output format (dashboard/api_json/audit_report)
+output_format: "dashboard"
+
+# Wildcard dictionary for unexpected judge-injected parameters
+custom_params: {}
+
+# --- Internal (not injectable via API) ---
+database_path: "data/lpse_x.db"
+models_path: "models/"
+reports_path: "reports/"
+random_seed: 42
+log_level: "INFO"
+
+--- All relative paths verified: PASS ---
+Relocation test: If lpse-x/ is moved to any directory, all path references use relative paths.

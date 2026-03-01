@@ -1,0 +1,36 @@
+=== ARCHITECTURE.md Mermaid + libraries check ===
+File exists: YES
+Line count: 256
+
+=== Mermaid diagrams ===
+12:│  │  Plotly.js   │    │   /api/graph     /api/reports     │   │
+91:### 3. Graph Cartel Detection (`backend/graph/`)
+110:- `geographic_overlap` × 0.2
+173:| `geographic_concentration` | distinct_regions / bidders | Regional cartel |
+212:GET /api/graph                    → all communities
+213:GET /api/graph/vendor/{vendor_id} → vendor community membership
+
+=== Library count in tech table ===
+256
+
+=== Core mechanisms (5 required) ===
+20:│  │  │  Tri-Method │  │   Oracle   │  │   Report      │  │   │
+48:### 1. Tri-Method AI Engine (`backend/ml/`)
+55:| XGBoost (ONNX) | Gradient boosting classifier | Primary risk scorer |
+69:**ONNX Export**: All models exported to ONNX for <200ms inference on CPU without retraining.
+73:### 2. Oracle Sandwich XAI (`backend/xai/`)
+79:| **SHAP** | shap (TreeExplainer) | Feature importance + waterfall | <2s |
+80:| **DiCE** | dice-ml | Counterfactual "what-if" scenarios | cached/async |
+82:| **Leiden Graph** | leidenalg | Community membership + cartel score | <1s |
+83:| **Benford's Law** | benford_py | Digit distribution chi-sq test | <0.5s |
+87:**Benford Applicability Gate**: Returns `"not_applicable"` if bid amounts don't span orders of magnitude — prevents misleading results on uniform data.
+95:**Algorithm**: Leiden community detection (Traag et al., 2019)
+116:**Purpose**: Zero-restart parameter injection — competition-critical requirement
+152:- `communities` — Leiden cartel detection results
+203:### Config (Dynamic Injection)
+207:GET  /api/config/log      → injection audit trail
+234:- **Audit Trail**: Every config injection logged with timestamp
+247:  models/             ONNX-exported ML models
+
+=== Technology justification ===
+172:| `participant_count_anomaly` | z-score vs category mean | Artificially low bidders |

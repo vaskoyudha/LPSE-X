@@ -1,0 +1,21 @@
+=== T19 Reports Page Component ===
+
+frontend/src/pages/Reports.tsx: EXISTS (385 lines)
+
+--- IIA report display ---
+2:import { generateReport, getReport } from '../api/client'
+4:import type { ReportResult } from '../types/models'
+7:// Demo tender IDs to generate reports for
+38:// Single report card (compact view in list)
+41:function ReportCard({
+43:  report,
+48:  report: ReportResult
+52:  const bgClass = RISK_BG[report.risk_level] ?? 'bg-gray-100 text-gray-700'
+66:            {new Date(report.generated_at).toLo
+
+--- PDF export ---
+frontend/src/pages/CartelGraph.tsx:91:export function CartelGraph(): React.ReactElement {
+frontend/src/pages/ConfigPanel.tsx:186:export function ConfigPanel(): React.ReactElement {
+frontend/src/pages/Dashboard.tsx:175:export function Dashboard(): React.ReactElement {
+frontend/src/pages/Reports.tsx:118:            Cetak / PDF
+frontend/src/pages/Reports.tsx:205:export function Reports(): React.React

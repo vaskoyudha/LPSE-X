@@ -1,0 +1,35 @@
+=== SPRINT_PLAYBOOK.md completeness ===
+File exists: YES
+Line count: 477
+
+=== Phase references ===
+21:## Phase 0 — Setup (0–2h)
+67:   ls models/ensemble.onnx 2>/dev/null || echo "ONNX not yet generated — will be created in Phase 1"
+68:   # Note: if missing, run T11 ONNX export (see Phase 1)
+78:**Phase 0 Exit Criteria**: `pytest tests/ -q` → 449 passed, SQLite DB exists.
+82:## Phase 1 — Core Features (2–8h)
+207:**Phase 1 Exit Criteria**: `models/iforest.pkl`, `models/xgboost.ubj` exist. `pytest tests/test_features.py tests/test_graph.py tests/test_models.py tests/test_benford.py tests/test_xai.py tests/test_onnx.py -q` → all pass.
+211:## Phase 2 — Integration (8–16h)
+305:**Phase 2 Exit Criteria**: All 7 API routes return 200. Frontend served. Dynamic injection works.
+309:## Phase 3 — Polish & UI (16–20h)
+365:**Phase 3 Exit Criteria**: Frontend loads in browser, offline mode works, no external calls.
+369:## Phase 4 — Demo Prep (20–24h)
+
+=== Task references (T1-T22) ===
+T1 T10 T11 T12 T13 T14 T15 T16 T17 T18 T19 T20 T21 T22 T23 T3 T4 T5 T6 T7 T8 T9 
+
+=== Commands present ===
+64
+
+=== Team roles ===
+9:## Team Role Assignments
+13:| **Lead ML Engineer** | 1 person | T5, T6, T7, T8, T9, T10, T11 — data pipeline + feature engineering + model training + ONNX export |
+15:| **Backend Engineer** | 1 person | T4, T14 — runtime config + FastAPI endpoints + dynamic injection |
+16:| **Frontend Engineer** | 1 person | T15, T16, T17, T18, T19 — React dashboard + Plotly charts + Folium maps |
+86:### T5/T6 — Data Pipeline + Feature Engineering (2–4h)
+
+=== Emergency protocols ===
+75:   # Fallback: use pre-cached SQLite dataset already in data/
+424:6. **CRITICAL**: Live injection demo (`PUT /api/config/inject`)
+430:## Emergency Protocols
+432:| Scenario | Detection | Fallback |

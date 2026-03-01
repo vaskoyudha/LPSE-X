@@ -1,0 +1,21 @@
+=== T15 Frontend Component Verification ===
+2026-03-01 19:36:44.524584
+
+--- Required files check ---
+frontend/src/pages/Dashboard.tsx: EXISTS (407 lines)
+frontend/src/pages/TenderDetail.tsx: EXISTS (632 lines)
+frontend/src/components/Layout.tsx: EXISTS (58 lines)
+frontend/src/api/client.ts: EXISTS (145 lines)
+frontend/src/hooks/useTenders.ts: MISSING
+frontend/src/hooks/usePrediction.ts: MISSING
+
+--- Build artifacts ---
+frontend/dist/index.html: EXISTS
+frontend/dist/assets: EXISTS
+
+--- React Router check ---
+frontend/src/App.tsx:2:import { BrowserRouter, Routes, Route } from 'react-router-dom'
+frontend/src/App.tsx:13:    <BrowserRouter>
+frontend/src/App.tsx:14:      <Routes>
+frontend/src/App.tsx:15:        <Route path="/" element={<Layout />}>
+frontend/src/App.tsx:16:          <Route index element={<Das

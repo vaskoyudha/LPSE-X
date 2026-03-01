@@ -1,0 +1,142 @@
+=== Cross-document consistency check ===
+
+--- Streamlit check (must be ABSENT) ---
+SPRINT_PLAYBOOK.md: 0
+0 occurrences
+DEMO_SCRIPT.md: 0
+0 occurrences
+ARCHITECTURE.md: 0
+0 occurrences
+TALKING_POINTS.md: 1 occurrences
+backend/: backend/analysis/benford.py:0
+backend/analysis/__init__.py:0
+backend/analysis/__pycache__/benford.cpython-311.pyc:0
+backend/analysis/__pycache__/__init__.cpython-311.pyc:0
+backend/api/routes/config.py:0
+backend/api/routes/graph.py:0
+backend/api/routes/health.py:0
+backend/api/routes/inference.py:0
+backend/api/routes/reports.py:0
+backend/api/routes/xai.py:0
+backend/api/routes/__init__.py:0
+backend/api/routes/__pycache__/config.cpython-311.pyc:0
+backend/api/routes/__pycache__/graph.cpython-311.pyc:0
+backend/api/routes/__pycache__/health.cpython-311.pyc:0
+backend/api/routes/__pycache__/inference.cpython-311.pyc:0
+backend/api/routes/__pycache__/reports.cpython-311.pyc:0
+backend/api/routes/__pycache__/xai.cpython-311.pyc:0
+backend/api/routes/__pycache__/__init__.cpython-311.pyc:0
+backend/api/__init__.py:0
+backend/api/__pycache__/__init__.cpython-311.pyc:0
+backend/config/injection.py:0
+backend/config/runtime.py:0
+backend/config/__init__.py:0
+backend/config/__pycache__/injection.cpython-311.pyc:0
+backend/config/__pycache__/injection.cpython-314.pyc:0
+backend/config/__pycache__/runtime.cpython-311.pyc:0
+backend/config/__pycache__/runtime.cpython-314.pyc:0
+backend/config/__pycache__/__init__.cpython-311.pyc:0
+backend/config/__pycache__/__init__.cpython-314.pyc:0
+backend/data/ingestion.py:0
+backend/data/lkpp_loader.py:0
+backend/data/pyproc_loader.py:0
+backend/data/storage.py:0
+backend/data/__init__.py:0
+backend/data/__pycache__/ingestion.cpython-311.pyc:0
+backend/data/__pycache__/lkpp_loader.cpython-311.pyc:0
+backend/data/__pycache__/pyproc_loader.cpython-311.pyc:0
+backend/data/__pycache__/storage.cpython-311.pyc:0
+backend/data/__pycache__/__init__.cpython-311.pyc:0
+backend/features/cardinal_flags.py:0
+backend/features/custom_features.py:0
+backend/features/pipeline.py:0
+backend/features/__init__.py:0
+backend/features/__pycache__/cardinal_flags.cpython-311.pyc:0
+backend/features/__pycache__/custom_features.cpython-311.pyc:0
+backend/features/__pycache__/pipeline.cpython-311.pyc:0
+backend/features/__pycache__/__init__.cpython-311.pyc:0
+backend/graph/builder.py:0
+backend/graph/cartel_scorer.py:0
+backend/graph/leiden.py:0
+backend/graph/__init__.py:0
+backend/graph/__pycache__/builder.cpython-311.pyc:0
+backend/graph/__pycache__/cartel_scorer.cpython-311.pyc:0
+backend/graph/__pycache__/leiden.cpython-311.pyc:0
+backend/graph/__pycache__/__init__.cpython-311.pyc:0
+backend/main.py:0
+backend/ml/ensemble.py:0
+backend/ml/icw_weak_labels.py:0
+backend/ml/isolation_forest.py:0
+backend/ml/onnx_export.py:0
+backend/ml/onnx_inference.py:0
+backend/ml/predict.py:0
+backend/ml/temporal_split.py:0
+backend/ml/train.py:0
+backend/ml/xgboost_model.py:0
+backend/ml/__init__.py:0
+backend/ml/__pycache__/ensemble.cpython-311.pyc:0
+backend/ml/__pycache__/icw_weak_labels.cpython-311.pyc:0
+backend/ml/__pycache__/isolation_forest.cpython-311.pyc:0
+backend/ml/__pycache__/onnx_export.cpython-311.pyc:0
+backend/ml/__pycache__/onnx_inference.cpython-311.pyc:0
+backend/ml/__pycache__/predict.cpython-311.pyc:0
+backend/ml/__pycache__/temporal_split.cpython-311.pyc:0
+backend/ml/__pycache__/train.cpython-311.pyc:0
+backend/ml/__pycache__/xgboost_model.cpython-311.pyc:0
+backend/ml/__pycache__/__init__.cpython-311.pyc:0
+backend/models_inference/__init__.py:0
+backend/reports/generator.py:0
+backend/reports/templates/pre_investigation.j2:0
+backend/reports/__init__.py:0
+backend/reports/__pycache__/generator.cpython-311.pyc:0
+backend/reports/__pycache__/__init__.cpython-311.pyc:0
+backend/schemas/models.py:0
+backend/schemas/__init__.py:0
+backend/schemas/__pycache__/models.cpython-311.pyc:0
+backend/schemas/__pycache__/__init__.cpython-311.pyc:0
+backend/services/__init__.py:0
+backend/xai/anchor_explainer.py:0
+backend/xai/dice_cache.py:0
+backend/xai/dice_explainer.py:0
+backend/xai/oracle_sandwich.py:0
+backend/xai/shap_explainer.py:0
+backend/xai/__init__.py:0
+backend/xai/__pycache__/anchor_explainer.cpython-311.pyc:0
+backend/xai/__pycache__/anchor_explainer.cpython-314.pyc:0
+backend/xai/__pycache__/dice_cache.cpython-311.pyc:0
+backend/xai/__pycache__/dice_cache.cpython-314.pyc:0
+backend/xai/__pycache__/dice_explainer.cpython-311.pyc:0
+backend/xai/__pycache__/dice_explainer.cpython-314.pyc:0
+backend/xai/__pycache__/oracle_sandwich.cpython-311.pyc:0
+backend/xai/__pycache__/oracle_sandwich.cpython-314.pyc:0
+backend/xai/__pycache__/shap_explainer.cpython-311.pyc:0
+backend/xai/__pycache__/shap_explainer.cpython-314.pyc:0
+backend/xai/__pycache__/__init__.cpython-311.pyc:0
+backend/xai/__pycache__/__init__.cpython-314.pyc:0
+backend/__init__.py:0
+backend/__pycache__/main.cpython-311.pyc:0
+backend/__pycache__/__init__.cpython-311.pyc:0
+backend/__pycache__/__init__.cpython-314.pyc:0
+0 occurrences
+
+--- React check (must be PRESENT) ---
+SPRINT_PLAYBOOK.md: 2 occurrences
+DEMO_SCRIPT.md: 0 occurrences
+ARCHITECTURE.md: 2 occurrences
+TALKING_POINTS.md: 1 occurrences
+
+--- Key stats consistency (70% KPK, 34/100 TI, 364 ICW, Rp 279.9T) ---
+docs/SPRINT_PLAYBOOK.md:
+      1 34/100
+      1 364
+      1 Rp 279
+docs/DEMO_SCRIPT.md:
+docs/ARCHITECTURE.md:
+docs/TALKING_POINTS.md:
+      1 364
+
+--- No console.log in prod frontend ---
+
+--- No external API calls in backend ---
+
+VERDICT: Consistency check PASS

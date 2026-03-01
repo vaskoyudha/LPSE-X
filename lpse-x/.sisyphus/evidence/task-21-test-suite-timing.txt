@@ -1,0 +1,53 @@
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 64%]
+........................................................................ [ 80%]
+........................................................................ [ 96%]
+.................                                                        [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\shap\plots\colors\_colorconv.py:819: 909 warnings
+  C:\Hackthon\lpse-x\.venv\Lib\site-packages\shap\plots\colors\_colorconv.py:819: DeprecationWarning: Converting `np.inexact` or `np.floating` to a dtype is deprecated. The current result is `float64` which is not strictly correct.
+    if np.issubdtype(dtype_in, np.dtype(dtype).type):
+
+tests/test_models.py::TestApplySMOTE::test_balanced_output_same_size_each_class
+tests/test_models.py::TestApplySMOTE::test_returns_numpy_arrays
+tests/test_models.py::TestApplySMOTE::test_feature_count_unchanged
+tests/test_models.py::TestApplySMOTE::test_output_larger_than_input_when_imbalanced
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+  C:\Hackthon\lpse-x\.venv\Lib\site-packages\sklearn\base.py:474: FutureWarning: `BaseEstimator._validate_data` is deprecated in 1.6 and will be removed in 1.7. Use `sklearn.utils.validation.validate_data` instead. This function becomes public and is part of the scikit-learn developer API.
+    warnings.warn(
+
+tests/test_models.py::TestApplySMOTE::test_balanced_output_same_size_each_class
+tests/test_models.py::TestApplySMOTE::test_returns_numpy_arrays
+tests/test_models.py::TestApplySMOTE::test_feature_count_unchanged
+tests/test_models.py::TestApplySMOTE::test_output_larger_than_input_when_imbalanced
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+  C:\Hackthon\lpse-x\.venv\Lib\site-packages\sklearn\utils\_tags.py:354: FutureWarning: The SMOTE or classes from which it inherits use `_get_tags` and `_more_tags`. Please define the `__sklearn_tags__` method, or inherit from `sklearn.base.BaseEstimator` and/or other appropriate mixins such as `sklearn.base.TransformerMixin`, `sklearn.base.ClassifierMixin`, `sklearn.base.RegressorMixin`, and `sklearn.base.OutlierMixin`. From scikit-learn 1.7, not defining `__sklearn_tags__` will raise an error.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 20 durations =============================
+56.41s setup    tests/test_dice_explainer.py::TestChangeItemStructure::test_changes_have_feature_key
+2.94s setup    tests/test_xai.py::TestAnchors::test_explainer_fits_without_error
+2.03s call     tests/test_models.py::TestApplySMOTE::test_balanced_output_same_size_each_class
+1.09s call     tests/test_xai.py::TestAnchors::test_result_has_anchor_rules
+0.83s call     tests/test_xai.py::TestAnchors::test_tender_id_preserved
+0.83s call     tests/test_xai.py::TestAnchors::test_plain_text_is_string
+0.82s call     tests/test_xai.py::TestAnchors::test_coverage_non_negative
+0.82s setup    tests/test_onnx.py::TestIforestOnnxExport::test_export_creates_onnx_file
+0.79s setup    tests/test_dice_explainer.py::TestDiceCacheManager::test_cache_json_file_created
+0.78s call     tests/test_xai.py::TestAnchors::test_compute_anchors_returns_result
+0.71s call     tests/test_xai.py::TestAnchors::test_precision_non_negative
+0.70s call     tests/test_xai.py::TestAnchors::test_computation_time_sla
+0.63s call     tests/test_models.py::TestIsolationForest::test_same_seed_same_scores
+0.50s call     tests/test_dice_explainer.py::TestAsyncGeneration::test_async_timeout_triggers_cache_fallback
+0.36s call     tests/test_models.py::TestIsolationForest::test_scores_in_zero_one
+0.33s call     tests/test_models.py::TestIsolationForest::test_single_row_scoring
+0.32s call     tests/test_models.py::TestIsolationForest::test_returns_ndarray
+0.32s call     tests/test_models.py::TestIsolationForest::test_score_shape_matches_input
+0.32s call     tests/test_models.py::TestIsolationForest::test_handles_nan_values
+0.31s call     tests/test_models.py::TestIsolationForest::test_fit_returns_isolation_forest
+449 passed, 921 warnings in 85.10s (0:01:25)

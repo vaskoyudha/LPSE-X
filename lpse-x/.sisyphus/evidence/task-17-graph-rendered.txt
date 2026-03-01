@@ -1,0 +1,23 @@
+=== T17 Graph Component ===
+
+frontend/src/pages/CartelGraph.tsx: EXISTS (292 lines)
+
+--- Force-directed graph library ---
+frontend/src/declarations.d.ts:25:    revision?: number
+frontend/src/pages/CartelGraph.tsx:3:import { ForceGraph2D } from 'react-force-graph'
+frontend/src/pages/CartelGraph.tsx:151:          <ForceGraph2D
+frontend/src/pages/CartelGraph.tsx:178:            d3AlphaDecay={0.03}
+frontend/src/pages/CartelGraph.tsx:179:            d3VelocityDecay={0.3}
+frontend/src/pages/Dashboard.tsx:295:      {/* Risk
+
+--- Community coloring ---
+13:    community_id: 1,
+20:    community_id: 2,
+32:    community_id: 3,
+44:  nodes: Array<{ id: string; communityId: number; color: string; size: number }>
+45:  links: Array<{ source: string; target: string; weight: number; color: string }>
+47:  const nodes: Array<{ id: string; communityId: number; color: string; size: number }> = []
+48:  const links: Array<{ source: string; target: string; weight
+
+--- Empty state ---
+(not found)

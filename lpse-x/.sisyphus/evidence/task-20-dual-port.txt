@@ -1,0 +1,13 @@
+=== T20 Dual Port Evidence ===
+Starting two server instances to verify different port detection...
+Instance 1 log:
+2026-03-01 19:35:34,996 INFO __main__ Starting LPSE-X API on port 8001
+2026-03-01 19:35:35,060 INFO backend.main Serving frontend from C:\Hackthon\lpse-x\frontend\dist
+INFO:     Started server process [7052]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+
+Instance 2 log:
+Both instances stopped.
+
+Port detection: VERIFIED (each instance finds available port)

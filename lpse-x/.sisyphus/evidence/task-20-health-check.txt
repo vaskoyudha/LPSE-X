@@ -1,0 +1,38 @@
+=== T20 Health Check Evidence ===
+Starting server briefly to capture health response...
+Server PID: 2065, Port: 8001
+
+--- GET /api/health ---
+LPSE-X starting on http://localhost:8001
+   App:     http://localhost:8001/
+   API:     http://localhost:8001/docs
+   (Frontend served from C:\Hackthon\lpse-x\frontend\dist)
+INFO:     127.0.0.1:54854 - "GET /api/health HTTP/1.1" 200 OK
+{
+  "status": "ok",
+  "version": "0.1.0",
+  "uptime": "00:00:03",
+  "uptime_seconds": 3,
+  "timestamp": "2026-03-01T12:35:19.377344+00:00",
+  "models": {
+    "xgboost": "not_found",
+    "isolation_forest": "not_found"
+  },
+  "config_hash": "7f71eba9",
+  "config": {
+    "risk_threshold": 0.65,
+    "anomaly_method": "ensemble",
+    "procurement_scope": "konstruksi"
+  }
+}
+
+--- Server log excerpt ---
+2026-03-01 19:35:18,750 INFO __main__ Starting LPSE-X API on port 8001
+2026-03-01 19:35:18,936 INFO backend.main Serving frontend from C:\Hackthon\lpse-x\frontend\dist
+INFO:     Started server process [12904]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+2026-03-01 19:35:19,377 INFO backend.config.runtime RuntimeConfig initialized from C:\Hackthon\lpse-x\config\runtime_config.yaml
+
+Server stopped.

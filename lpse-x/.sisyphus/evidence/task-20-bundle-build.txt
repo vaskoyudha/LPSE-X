@@ -1,0 +1,36 @@
+=== T20 Bundle Build Evidence ===
+
+--- scripts/build_bundle.sh exists: NO ---
+--- scripts/build_bundle.bat exists: NO ---
+--- main.py exists: NO ---
+
+--- Bundle contents check ---
+total 41K
+-rw-r--r-- 1 vasco 197609   61 Feb 28 01:19 C:Hackthon.sisyphusevidencetask-4-config-load.txt
+-rw-r--r-- 1 vasco 197609   61 Feb 28 01:20 C:Hackthon.sisyphusevidencetask-4-custom-params.txt
+-rw-r--r-- 1 vasco 197609   61 Feb 28 01:20 C:Hackthon.sisyphusevidencetask-4-injection-success.txt
+-rw-r--r-- 1 vasco 197609   61 Feb 28 01:20 C:Hackthon.sisyphusevidencetask-4-injection-validation.txt
+-rw-r--r-- 1 vasco 197609  314 Feb 27 23:08 Makefile
+-rw-r--r-- 1 vasco 197609    0 Feb 27 23:07 __init__.py
+drwxr-xr-x 1 vasco 197609    0 Feb 28 06:30 __pycache__
+drwxr-xr-x 1 vasco 197609    0 Feb 28 08:37 backend
+drwxr-xr-x 1 vasco 197609    0 Feb 27 23:07 config
+drwxr-xr-x 1 vasco 197609    0 Feb 28 06:30 data
+drwxr-xr-x 1 vasco 197609    0 Mar  1 18:22 docs
+drwxr-xr-x 1 vasco 197609    0 Feb 28 06:09 frontend
+drwxr-xr-x 1 vasco 197609    0 Feb 27 23:08 models
+-rw-r--r-- 1 vasco 197609 1017 Feb 28 01:03 pyproject.toml
+drwxr-xr-x 1 vasco 197609    0 Feb 27 23:08 reports
+-rwxr-xr-x 1 vasco 197609 4.2K Feb 28 13:31 start_lpse_x.py
+drwxr-xr-x 1 vasco 197609    0 Feb 28 14:11 tests
+
+--- static/index.html exists: NO ---
+--- frontend/dist/index.html exists: YES ---
+
+--- requirements.txt exists ---
+NO requirements.txt
+
+--- pyproject.toml exists ---
+YES
+
+--- All paths relative check ---

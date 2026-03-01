@@ -1,0 +1,17 @@
+=== T18 Risk Map Component ===
+
+frontend/src/pages/RiskMap.tsx: EXISTS (300 lines)
+
+--- Map library (Leaflet/MapLibre) ---
+2:import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
+3:import 'leaflet/dist/leaflet.css'
+139:// Main RiskMap page
+142:export function RiskMap(): React.ReactElement {
+178:      {/* Map + table */}
+180:        {/* Map */}
+182:          <MapContainer
+188:            {/* OpenStreetMap tiles — offline note: would use local tile server in production */}
+190:              attrib
+
+--- Offline map (no external tiles) ---
+(not found)

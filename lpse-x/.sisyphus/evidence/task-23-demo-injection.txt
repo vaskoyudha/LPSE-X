@@ -1,0 +1,38 @@
+=== DEMO_SCRIPT.md injection demo check ===
+File exists: YES
+Line count: 166
+
+=== Dynamic Injection references ===
+21:# 4. Siapkan terminal untuk live injection demo
+91:curl http://localhost:<port>/api/config
+94:curl -X PUT http://localhost:<port>/api/config/inject \
+110:curl http://localhost:<port>/api/config
+114:- Response injection: `{"success": true, "old_values": {...}, "new_values": {...}}`
+153:| "Bisa inject parameter apapun?" | "Ya, via `custom_params` dict. Sistem menerima key-value arbitrary tanpa schema error." |
+162:- [ ] Injection endpoint responsif (`curl /api/config/inject`)
+166:- [ ] Terminal siap untuk live injection demo
+
+=== XAI layer references ===
+5:**Platform**: LPSE-X — Forensik Pengadaan Pemerintah Berbasis XAI  
+6:**Hackathon**: Find IT! 2026 UGM — Track C: "The Explainable Oracle"  
+44:- Halaman detail → tampilkan **Oracle Sandwich XAI** (5 layer)
+46:**Poin utama per layer:**
+50:| **SHAP** | Bar chart feature importance | "n_bidders=1 berkontribusi +0.42 ke skor risiko" |
+51:| **Anchors** | Rule cards | "JIKA n_bidders ≤ 1 DAN price_ratio > 0.98 → Risiko Tinggi (presisi 91%)" |
+54:| **DiCE** | Counterfactual cards | "Jika jumlah peserta ≥ 3, risiko turun ke 0.31 (Aman)" |
+139:> - **XAI Quality (40%)**: 5 layer Oracle Sandwich — SHAP, Anchors, DiCE, Leiden, Benford
+140:> - **Completeness (30%)**: Data pipeline → ML → XAI → Laporan, end-to-end
+151:| "Apakah model bisa salah?" | "Ya — itulah mengapa kami pakai XAI. SHAP dan Anchors menunjukkan reasoning, sehingga auditor bisa override jika ada konteks yang model tidak tahu." |
+
+=== Minute-by-minute breakdown ===
+21:# 4. Siapkan terminal untuk live injection demo
+87:**Script terminal:**
+99:    "institution_filter": ["Kemenkeu", "Kemen-PUPR"],
+100:    "year_range": [2022, 2024],
+160:- [ ] Server berjalan di port auto-detected
+161:- [ ] Dashboard menampilkan data (≥10 tender dengan risk scores)
+162:- [ ] Injection endpoint responsif (`curl /api/config/inject`)
+163:- [ ] Graph page menampilkan komunitas
+164:- [ ] Reports page menghasilkan laporan
+165:- [ ] Wi-Fi test: matikan → sistem tetap jalan
+166:- [ ] Terminal siap untuk live injection demo
