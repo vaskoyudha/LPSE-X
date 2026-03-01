@@ -1,0 +1,35 @@
+{
+  "model_type": "IsolationForest",
+  "feature_names": [
+    "R003_short_notice_period",
+    "R004_non_competitive_method",
+    "R005_rushed_procurement",
+    "R007_value_near_threshold",
+    "R011_sole_source_justification",
+    "R021_few_bidders",
+    "R022_winner_always_same",
+    "R028_abnormally_low_bid",
+    "R035_price_fixing_evidence",
+    "R042_winner_concentration_inst",
+    "R052_winning_bid_hps_ratio",
+    "R057_award_concentration_vendor",
+    "R058_award_timing_anomaly",
+    "bid_clustering_score",
+    "vendor_win_concentration",
+    "hps_deviation_ratio",
+    "participant_count_anomaly",
+    "repeat_pairing_index",
+    "historical_win_rate",
+    "phantom_bidder_score",
+    "interlocking_directorates"
+  ],
+  "n_features": 21,
+  "score_output": "anomaly_score_0_to_1",
+  "exported_at": "2026-03-01T14:20:39.259072+00:00",
+  "onnx_path": "models\\iforest.onnx",
+  "export_method": "skl2onnx_bool_patched",
+  "target_opset": {
+    "": 15,
+    "ai.onnx.ml": 2
+  }
+}

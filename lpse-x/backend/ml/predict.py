@@ -9,6 +9,7 @@ NEVER retrain here -- inference-only.
 """
 from __future__ import annotations
 
+import json
 import logging
 import pickle
 from pathlib import Path
@@ -26,11 +27,67 @@ from backend.ml.isolation_forest import score_isolation_forest
 
 logger = logging.getLogger(__name__)
 
+
+class BoosterWrapper:
+    """
+    Thin wrapper around xgb.Booster that exposes predict_proba()
+    for compatibility with SHAP explainer and other sklearn-style callers.
+    """
+    def __init__(self, booster: xgb.Booster) -> None:
+        self._booster = booster
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Return class probabilities, shape (n, n_classes)."""
+        dmatrix = xgb.DMatrix(X.astype(np.float32))
+        probs = self._booster.predict(dmatrix)
+        if probs.ndim == 1:
+            # Binary classification — wrap as 2-class
+            probs = np.column_stack([1 - probs, probs])
+        return probs
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Return class labels."""
+        probs = self.predict_proba(X)
+        return np.argmax(probs, axis=1)
+
+    # Delegate everything else to Booster
+    def __getattr__(self, name: str):
+        return getattr(self._booster, name)
+
+
 _iforest_model: IsolationForest | None = None
-_xgboost_model: xgb.XGBClassifier | None = None
+_xgboost_booster: xgb.Booster | None = None
+_model_feature_names: list[str] | None = None
 
 IFOREST_MODEL_PATH = Path("models") / "iforest.pkl"
 XGBOOST_MODEL_PATH = Path("models") / "xgboost.ubj"
+IFOREST_META_PATH = Path("models") / "iforest.json"
+
+
+def _load_feature_names() -> list[str]:
+    """Load the 21 training feature names from IForest sidecar JSON."""
+    global _model_feature_names
+    if _model_feature_names is None:
+        if IFOREST_META_PATH.exists():
+            with open(IFOREST_META_PATH, encoding="utf-8") as f:
+                meta = json.load(f)
+            _model_feature_names = meta["feature_names"]
+            logger.info("Loaded %d training feature names from %s", len(_model_feature_names), IFOREST_META_PATH)
+        else:
+            logger.warning("IForest metadata not found at %s -- feature filtering disabled", IFOREST_META_PATH)
+            _model_feature_names = []
+    return _model_feature_names
+
+
+def _filter_features(X_df: pd.DataFrame) -> pd.DataFrame:
+    """Select only the 21 training features. Missing columns filled with 0.0."""
+    feat_names = _load_feature_names()
+    if not feat_names:
+        return X_df
+    result = pd.DataFrame(index=X_df.index)
+    for col in feat_names:
+        result[col] = X_df[col].fillna(0.0) if col in X_df.columns else 0.0
+    return result
 
 
 def _load_iforest() -> IsolationForest | None:
@@ -45,16 +102,18 @@ def _load_iforest() -> IsolationForest | None:
     return _iforest_model
 
 
-def _load_xgboost() -> xgb.XGBClassifier | None:
-    global _xgboost_model
-    if _xgboost_model is None:
+def _load_xgboost() -> "BoosterWrapper | None":
+    """Load XGBoost model wrapped for sklearn-style API compatibility."""
+    global _xgboost_booster
+    if _xgboost_booster is None:
         if XGBOOST_MODEL_PATH.exists():
-            _xgboost_model = xgb.XGBClassifier()
-            _xgboost_model.load_model(str(XGBOOST_MODEL_PATH))
-            logger.info("XGBoost loaded from %s", XGBOOST_MODEL_PATH)
+            booster = xgb.Booster()
+            booster.load_model(str(XGBOOST_MODEL_PATH))
+            _xgboost_booster = BoosterWrapper(booster)
+            logger.info("XGBoost Booster loaded from %s", XGBOOST_MODEL_PATH)
         else:
             logger.warning("XGBoost model not found at %s", XGBOOST_MODEL_PATH)
-    return _xgboost_model
+    return _xgboost_booster
 
 
 def predict_single(
@@ -78,11 +137,14 @@ def predict_single(
     tender_id: str = str(feature_vector.get("tender_id", "unknown"))
     cfg = get_config()
 
-    # Build feature DataFrame (single row)
+    # Build feature DataFrame (single row) from all incoming features
     row = {k: float(v) if isinstance(v, (int, float)) else 0.0
            for k, v in feature_vector.items()
            if k != "tender_id"}
-    X_df = pd.DataFrame([row])
+    X_df_full = pd.DataFrame([row])
+
+    # Filter to only the 21 training features
+    X_df = _filter_features(X_df_full)
 
     # -- Isolation Forest score --
     iforest = _load_iforest()
@@ -91,13 +153,13 @@ def predict_single(
     else:
         if_score = 0.5  # neutral fallback
 
-    # -- XGBoost score --
-    xgb_model = _load_xgboost()
-    if xgb_model is not None:
-        X_np = X_df.fillna(0.0).to_numpy(dtype=float)
-        probs: np.ndarray = xgb_model.predict_proba(X_np)[0]
-        # High-risk score = probability of class 2 (Risiko Tinggi) + class 3 (Risiko Kritis)
-        xgb_score = float(probs[2] + probs[3])
+    # -- XGBoost score (via BoosterWrapper for sklearn API compat) --
+    booster = _load_xgboost()
+    if booster is not None:
+        X_np = X_df.fillna(0.0).to_numpy(dtype=np.float32)
+        probs = booster.predict_proba(X_np)[0]  # (n_classes,)
+        # High-risk score = P(class 2: Risiko Tinggi) + P(class 3: Risiko Kritis)
+        xgb_score = float(probs[2] + probs[3]) if len(probs) >= 4 else float(probs[-1])
     else:
         xgb_score = 0.5  # neutral fallback
 

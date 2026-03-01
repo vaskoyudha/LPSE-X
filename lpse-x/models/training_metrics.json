@@ -1,0 +1,18 @@
+{
+  "train_size": 590,
+  "val_size": 152,
+  "test_size": 308,
+  "n_features": 21,
+  "xgb_best_params": {
+    "learning_rate": 0.11861663446573512,
+    "max_depth": 10,
+    "n_estimators": 393,
+    "subsample": 0.8394633936788146,
+    "colsample_bytree": 0.6624074561769746,
+    "min_child_weight": 2
+  },
+  "seed": 42,
+  "f1_macro": 0.5137,
+  "precision_macro": 0.5779,
+  "recall_macro": 0.5381
+}

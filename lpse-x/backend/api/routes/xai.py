@@ -15,7 +15,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.xai import explain_tender, OracleSandwichResult
-from backend.ml.predict import _load_xgboost
+from backend.ml.predict import _load_xgboost, _filter_features
 from backend.config.runtime import get_config
 
 logger = logging.getLogger(__name__)
@@ -95,11 +95,12 @@ async def get_xai_explanation(tender_id: str, request: XaiRequest) -> dict:
     try:
         model = _load_xgboost()  # may be None — each layer handles it gracefully
 
-        # Build single-row DataFrame
+        # Build single-row DataFrame (filter to 21 training features)
         row = {k: float(v) if isinstance(v, (int, float)) else 0.0
                for k, v in request.features.items()
                if k != "tender_id"}
-        instance_df = pd.DataFrame([row])
+        instance_df_full = pd.DataFrame([row])
+        instance_df = _filter_features(instance_df_full)
 
         # Get cached DiCE result if available
         dice_cache = None

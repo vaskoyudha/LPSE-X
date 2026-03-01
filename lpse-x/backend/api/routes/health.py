@@ -35,7 +35,7 @@ async def health_check() -> dict:
 
     # Check if model files exist
     from pathlib import Path
-    model_dir = Path(__file__).parent.parent.parent / "models"
+    model_dir = Path(__file__).parent.parent.parent.parent / "models"
     xgb_ok = (model_dir / "xgboost.ubj").exists()
     iforest_ok = (model_dir / "iforest.pkl").exists()
 

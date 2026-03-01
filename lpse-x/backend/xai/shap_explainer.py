@@ -115,7 +115,9 @@ def compute_shap_global(
     X_np = X_train.fillna(0.0).to_numpy(dtype=float)
     feature_names: list[str] = list(X_train.columns)
 
-    explainer = shap.TreeExplainer(model)
+    # Unwrap BoosterWrapper to get raw xgb.Booster for SHAP
+    _shap_model = getattr(model, '_booster', model)
+    explainer = shap.TreeExplainer(_shap_model)
 
     # shap_values: for multi-class XGBoost, shape = (n_samples, n_features, n_classes)
     # or list of [n_samples x n_features] arrays — depends on shap version.
@@ -208,7 +210,9 @@ def compute_shap_local(
     if X_np.shape[0] != 1:
         raise ValueError(f"compute_shap_local expects a single-row DataFrame, got {X_np.shape[0]} rows")
 
-    explainer = shap.TreeExplainer(model)
+    # Unwrap BoosterWrapper to get raw xgb.Booster for SHAP
+    _shap_model = getattr(model, '_booster', model)
+    explainer = shap.TreeExplainer(_shap_model)
     raw_shap = explainer.shap_values(X_np)
 
     # For multiclass: average SHAP values across classes for interpretability
