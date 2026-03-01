@@ -1,0 +1,17 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.6.0 -- C:\Hackthon\lpse-x\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Hackthon\lpse-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.25.0, cov-6.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None
+collecting ... collected 45 items
+
+tests/test_dice_explainer.py::TestCounterfactualResultStructure::test_result_has_required_top_level_keys PASSED [  2%]
+tests/test_dice_explainer.py::TestCounterfactualResultStructure::test_tender_id_preserved PASSED [  4%]
+tests/test_dice_explainer.py::TestCounterfactualResultStructure::test_original_matches_input_features PASSED [  6%]
+tests/test_dice_explainer.py::TestCounterfactualResultStructure::test_generation_time_ms_is_positive PASSED [  8%]
+tests/test_dice_explainer.py::TestCounterfactualResultStructure::test_from_cache_is_false_for_sync PASSED [ 11%]
+tests/test_dice_explainer.py::TestSyncGeneration::test_returns_requested_cfs_count PASSED [ 13%]
+tests/test_dice_explainer.py::TestSyncGeneration::test_cfs_count_does_not_exceed_max PASSED [ 15%]
+tests/test_dice_explainer.py::TestSyncGeneration::test_error_is_none_on_success 

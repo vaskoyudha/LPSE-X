@@ -1,0 +1,32 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.6.0
+rootdir: C:\Hackthon\lpse-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.25.0, cov-6.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None
+collected 82 items
+
+tests\test_models.py ................................................... [ 62%]
+...............................                                          [100%]
+
+============================== warnings summary ===============================
+tests/test_models.py::TestApplySMOTE::test_balanced_output_same_size_each_class
+tests/test_models.py::TestApplySMOTE::test_returns_numpy_arrays
+tests/test_models.py::TestApplySMOTE::test_feature_count_unchanged
+tests/test_models.py::TestApplySMOTE::test_output_larger_than_input_when_imbalanced
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+  C:\Hackthon\lpse-x\.venv\Lib\site-packages\sklearn\base.py:474: FutureWarning: `BaseEstimator._validate_data` is deprecated in 1.6 and will be removed in 1.7. Use `sklearn.utils.validation.validate_data` instead. This function becomes public and is part of the scikit-learn developer API.
+    warnings.warn(
+
+tests/test_models.py::TestApplySMOTE::test_balanced_output_same_size_each_class
+tests/test_models.py::TestApplySMOTE::test_returns_numpy_arrays
+tests/test_models.py::TestApplySMOTE::test_feature_count_unchanged
+tests/test_models.py::TestApplySMOTE::test_output_larger_than_input_when_imbalanced
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+tests/test_models.py::TestApplySMOTE::test_seed_reproducibility
+  C:\Hackthon\lpse-x\.venv\Lib\site-packages\sklearn\utils\_tags.py:354: FutureWarning: The SMOTE or classes from which it inherits use `_get_tags` and `_more_tags`. Please define the `__sklearn_tags__` method, or inherit from `sklearn.base.BaseEstimator` and/or other appropriate mixins such as `sklearn.base.TransformerMixin`, `sklearn.base.ClassifierMixin`, `sklearn.base.RegressorMixin`, and `sklearn.base.OutlierMixin`. From scikit-learn 1.7, not defining `__sklearn_tags__` will raise an error.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 82 passed, 12 warnings in 7.13s =======================

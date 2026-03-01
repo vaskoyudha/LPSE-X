@@ -114,7 +114,7 @@ if __name__ == "__main__":
     )
     port = find_free_port()
     logger.info("Starting LPSE-X API on port %d", port)
-    print(f"🚀 LPSE-X starting on http://localhost:{port}")
+    print(f"LPSE-X starting on http://localhost:{port}")
     print(f"   App:     http://localhost:{port}/")
     print(f"   API:     http://localhost:{port}/docs")
     if _DIST_DIR.exists():

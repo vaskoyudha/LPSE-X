@@ -1,0 +1,27 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.6.0 -- C:\Hackthon\lpse-x\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Hackthon\lpse-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.25.0, cov-6.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None
+collecting ... collected 16 items
+
+tests/test_onnx.py::TestXgboostOnnxExport::test_export_creates_onnx_file PASSED [  6%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_export_creates_metadata_json PASSED [ 12%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_session_loads_from_path PASSED [ 18%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_predict_returns_correct_shape PASSED [ 25%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_predict_labels_are_valid_classes PASSED [ 31%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_predict_probabilities_sum_to_one PASSED [ 37%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_predict_risk_names_are_valid PASSED [ 43%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_predict_parity_with_native_xgboost PASSED [ 50%]
+tests/test_onnx.py::TestXgboostOnnxExport::test_predict_inference_sla PASSED [ 56%]
+tests/test_onnx.py::TestIforestOnnxExport::test_export_creates_onnx_file PASSED [ 62%]
+tests/test_onnx.py::TestIforestOnnxExport::test_export_creates_metadata_json PASSED [ 68%]
+tests/test_onnx.py::TestIforestOnnxExport::test_session_loads_from_path PASSED [ 75%]
+tests/test_onnx.py::TestIforestOnnxExport::test_score_returns_correct_shape PASSED [ 81%]
+tests/test_onnx.py::TestIforestOnnxExport::test_scores_in_zero_one_range PASSED [ 87%]
+tests/test_onnx.py::TestIforestOnnxExport::test_score_parity_monotonicity_with_native PASSED [ 93%]
+tests/test_onnx.py::TestIforestOnnxExport::test_score_inference_sla PASSED [100%]
+
+============================= 16 passed in 3.58s ==============================

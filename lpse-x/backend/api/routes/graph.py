@@ -3,14 +3,12 @@ T14: Graph Route
 GET /api/graph — return vendor graph communities (Leiden detection results)
 """
 from __future__ import annotations
-
+import json
 import logging
 from datetime import datetime, timezone
-from typing import Any
-
+import aiosqlite
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/graph", tags=["graph"])
 
@@ -32,20 +30,38 @@ async def get_graph_communities(
 ) -> dict:
     """
     Return vendor bid-rigging communities detected by Leiden algorithm.
-
-    Each community represents a group of vendors suspected of coordinated bidding.
     Communities are sorted by cartel risk score (descending).
-
-    Note: Returns cached/pre-computed communities. Run graph builder first
-    (T17 integration) to populate communities.
     """
     try:
         from backend.config.runtime import get_config
         cfg = get_config()
-
-        # TODO (T17): query actual Leiden communities from SQLite
-        # For now, return structured stub demonstrating API contract
+        db_path = "data/lpse_x.db"
         communities: list[dict] = []
+        try:
+            async with aiosqlite.connect(db_path) as db:
+                db.row_factory = aiosqlite.Row
+                cursor = await db.execute(
+                    """
+                    SELECT community_id, member_ids, risk_score, size, detected_at
+                    FROM communities
+                    WHERE size >= ?
+                    ORDER BY risk_score DESC
+                    LIMIT ?
+                    """,
+                    (min_community_size, top_n),
+                )
+                rows = await cursor.fetchall()
+                for row in rows:
+                    communities.append({
+                        "community_id": row["community_id"],
+                        "members": json.loads(row["member_ids"]),
+                        "risk_score": row["risk_score"],
+                        "size": row["size"],
+                        "detected_at": row["detected_at"],
+                    })
+        except aiosqlite.OperationalError:
+            # Table doesn't exist yet — no communities have been computed
+            logger.info("get_graph_communities: communities table not found — no data ingested yet")
 
         return {
             "status": "ok",
@@ -58,8 +74,6 @@ async def get_graph_communities(
                 "top_n": top_n,
             },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "note": "Community graph requires T17 integration to populate. "
-                    "Run backend/graph/builder.py then backend/graph/leiden.py.",
         }
 
     except Exception as exc:
@@ -77,17 +91,52 @@ async def get_graph_communities(
 async def get_vendor_community(vendor_id: str) -> dict:
     """
     Get community membership for a specific vendor.
-
-    Returns the community this vendor belongs to (if any), plus
     co-bidding partners and risk score.
     """
-    return {
-        "status": "ok",
-        "vendor_id": vendor_id,
-        "in_community": False,
-        "community_id": None,
-        "community_risk_score": None,
-        "co_bidders": [],
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "note": "Requires T17 graph integration to populate vendor lookup.",
-    }
+    try:
+
+
+        db_path = "data/lpse_x.db"
+
+        result: dict = {
+            "status": "ok",
+            "vendor_id": vendor_id,
+            "in_community": False,
+            "community_id": None,
+            "community_risk_score": None,
+            "co_bidders": [],
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        try:
+            async with aiosqlite.connect(db_path) as db:
+                db.row_factory = aiosqlite.Row
+                cursor = await db.execute(
+                    "SELECT community_id, member_ids, risk_score FROM communities",
+                )
+                rows = await cursor.fetchall()
+                for row in rows:
+                    members = json.loads(row["member_ids"])
+                    if vendor_id in members:
+                        co_bidders = [m for m in members if m != vendor_id]
+                        result.update({
+                            "in_community": True,
+                            "community_id": row["community_id"],
+                            "community_risk_score": row["risk_score"],
+                            "co_bidders": co_bidders,
+                        })
+                        break
+        except aiosqlite.OperationalError:
+            logger.info("get_vendor_community: communities table not found")
+
+        return result
+
+    except Exception as exc:
+        logger.exception("get_vendor_community failed for vendor_id=%s", vendor_id)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": str(exc),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        ) from exc

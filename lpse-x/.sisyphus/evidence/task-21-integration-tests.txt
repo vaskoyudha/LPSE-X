@@ -1,0 +1,17 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.6.0
+rootdir: C:\Hackthon\lpse-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.25.0, cov-6.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None
+collected 36 items
+
+tests\test_integration.py ....................................           [100%]
+
+============================== warnings summary ===============================
+tests/test_integration.py: 909 warnings
+  C:\Hackthon\lpse-x\.venv\Lib\site-packages\shap\plots\colors\_colorconv.py:819: DeprecationWarning: Converting `np.inexact` or `np.floating` to a dtype is deprecated. The current result is `float64` which is not strictly correct.
+    if np.issubdtype(dtype_in, np.dtype(dtype).type):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 36 passed, 909 warnings in 3.98s =======================
