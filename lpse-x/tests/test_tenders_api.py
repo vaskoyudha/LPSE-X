@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -148,7 +149,7 @@ def _client(test_db_path: str) -> AsyncClient:
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
 
 
-async def _get(path: str, test_db_path: str, **params) -> dict:
+async def _get(path: str, test_db_path: str, **params) -> Any:
     """Perform GET with DB path patched. Returns (status_code, json_body)."""
     url = path
     if params:

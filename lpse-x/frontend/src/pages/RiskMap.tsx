@@ -361,11 +361,23 @@ export function RiskMap(): React.ReactElement {
     let cancelled = false
     async function fetchAll(): Promise<void> {
       try {
-        // Fetch all 1050 tenders in one request
-        const res = await listTenders({ page: 1, page_size: 1050 })
-        if (cancelled) return
-        setTotalTenders(res.total)
-        setRegions(aggregateTenders(res.items))
+        const PAGE_SIZE = 100
+        let page = 1
+        let totalCount = 0
+        const allItems: TenderWithRisk[] = []
+        
+        do {
+          const res = await listTenders({ page, page_size: PAGE_SIZE })
+          if (cancelled) return
+          if (page === 1) totalCount = res.total
+          allItems.push(...res.items)
+          page++
+        } while (allItems.length < totalCount)
+        
+        if (!cancelled) {
+          setTotalTenders(totalCount)
+          setRegions(aggregateTenders(allItems))
+        }
       } catch {
         // silently fail — show empty map
       } finally {

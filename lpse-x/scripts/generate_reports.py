@@ -2,17 +2,17 @@
 generate_reports.py
 ===================
 Pre-generates IIA 2025-format investigation reports for the top-5 highest-risk
-tenders and inserts them into the `reports` table.
+tenders by reading directly from the predictions table (bypassing ReportGenerator).
 
 Usage:
-    cd /c/Hackthon/lpse-x
+    cd C:/Hackthon/lpse-x
     .venv/Scripts/python.exe scripts/generate_reports.py
 
 Constraints:
   - No ORM — raw sqlite3 only
   - No external API calls — fully offline
   - Uses existing tables exactly as-is (no migrations)
-  - seed=42
+  - Maps English risk_level to Indonesian display names
 """
 from __future__ import annotations
 
@@ -21,38 +21,106 @@ import sqlite3
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from types import SimpleNamespace
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-# ---------------------------------------------------------------------------
-# Ensure project root is on sys.path so backend package is importable
-# ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-
-from backend.reports.generator import ReportGenerator  # noqa: E402
-
 DB_PATH = PROJECT_ROOT / "data" / "lpse_x.db"
 TOP_N = 5
 
+# Risk level mapping: English -> Indonesian
+RISK_LEVEL_MAP = {
+    "high": "Kritis",
+    "medium": "Berisiko",
+    "low": "Aman",
+}
 
-def _make_dummy_oracle(tender_id: str) -> SimpleNamespace:
-    """
-    Build a minimal oracle result with all layers in not_applicable state.
-    The generator is fault-tolerant and produces a valid report from this.
-    """
-    dummy_layer = SimpleNamespace(status="not_applicable", data=None, error=None)
-    return SimpleNamespace(
-        tender_id=tender_id,
-        shap=dummy_layer,
-        dice=dummy_layer,
-        anchors=dummy_layer,
-        leiden=dummy_layer,
-        benford=dummy_layer,
-        layers_ok=0,
-        layers_failed=0,
-        total_seconds=0.0,
-    )
+# Recommendations per risk level (Indonesian)
+RECOMMENDATIONS_MAP = {
+    "high": [
+        "SEGERA laporkan ke otoritas pengawas terkait",
+        "Tunda proses pengadaan hingga investigasi selesai",
+        "Cegah pemenang dari melakukan transaksi hingga clear verification",
+    ],
+    "medium": [
+        "Lakukan investigasi lebih lanjut sebelum approval pengadaan",
+        "Monitor pelaksanaan kontrak lebih ketat",
+        "Dokumentasikan semua anomali yang terdeteksi",
+    ],
+    "low": [
+        "Tidak ada tindakan khusus yang diperlukan",
+        "Lanjutkan proses pengadaan sesuai prosedur normal",
+        "Monitor berkala saja",
+    ],
+}
+
+# Narrative per risk level (Indonesian)
+NARRATIVE_MAP = {
+    "high": "Sistem mendeteksi INDIKATOR KECURANGAN KRITIS pada tender ini. Diperlukan PENYELIDIKAN SEGERA untuk memverifikasi keaslian data dan integritas proses.",
+    "medium": "Sistem mendeteksi ANOMALI SEDANG pada tender ini. Diperlukan investigasi lebih lanjut untuk memastikan kepatuhan terhadap regulasi pengadaan.",
+    "low": "Sistem tidak mendeteksi anomali signifikan. Tender ini dapat dilanjutkan sesuai prosedur standar.",
+}
+
+EXPLANATION_TEXT_MAP = {
+    "high": "LAPORAN PRA-INVESTIGASI - INDIKASI KECURANGAN KRITIS. Analisis machine learning menemukan pola risiko tinggi pada tender ini yang memerlukan tindakan segera.",
+    "medium": "LAPORAN PRA-INVESTIGASI - ANOMALI TERDETEKSI. Analisis menemukan beberapa indikator risiko yang memerlukan verifikasi lebih lanjut.",
+    "low": "LAPORAN PRA-INVESTIGASI - NORMAL. Analisis tidak menemukan indikasi kecurangan signifikan.",
+}
+
+
+def extract_top_features(feature_json: str, max_count: int = 3) -> list[dict[str, object]]:
+    """Extract top features from feature_json for display."""
+    try:
+        features_dict = json.loads(feature_json) if isinstance(feature_json, str) else feature_json
+        # Convert to list of dicts with name and value
+        feature_list = [
+            {"name": k, "value": v, "contribution": v}
+            for k, v in features_dict.items()
+            if isinstance(v, (int, float))
+        ]
+        # Sort by absolute value descending
+        feature_list.sort(key=lambda x: abs(x["value"]), reverse=True)
+        
+        # Add nice labels for common features
+        label_map = {
+            "R001_single_bid": "Indikator Penawar Tunggal",
+            "R002_bid_near_hps": "Penawar Sangat Dekat HPS",
+            "R003_bid_pattern": "Pola Penawaran Mencurigakan",
+        }
+        
+        for feature in feature_list[:max_count]:
+            feature["label"] = label_map.get(feature["name"], feature["name"])  # type: ignore
+        
+        return feature_list[:max_count]
+    except Exception as e:
+        print(f"[WARNING] Error extracting features: {e}", file=sys.stderr)
+        return []
+
+
+def build_report_content(
+    tender_id: str,
+    risk_level_en: str,
+    risk_score: float,
+    feature_json: str,
+) -> dict[str, object]:
+    """Build complete report JSON content."""
+    risk_level_id = RISK_LEVEL_MAP.get(risk_level_en, "Aman")
+    
+    return {
+        "tender_id": tender_id,
+        "risk_level": risk_level_id,
+        "risk_level_en": risk_level_en,
+        "risk_score": round(float(risk_score), 6),
+        "evidence_count": 3,  # Placeholder
+        "top_features": extract_top_features(feature_json),
+        "recommendations": RECOMMENDATIONS_MAP.get(risk_level_en, []),
+        "explanation_text": EXPLANATION_TEXT_MAP.get(risk_level_en, ""),
+        "narrative": NARRATIVE_MAP.get(risk_level_en, ""),
+        "sections": {
+            "ringkasan": f"Tender {tender_id} dinilai memiliki risiko {risk_level_id}",
+            "analisis": f"Score risiko: {risk_score:.4f}",
+            "rekomendasi": ", ".join(RECOMMENDATIONS_MAP.get(risk_level_en, [])),
+        },
+    }
 
 
 def main() -> None:
@@ -61,7 +129,17 @@ def main() -> None:
     conn.row_factory = sqlite3.Row
 
     # ------------------------------------------------------------------
-    # 1. Query top-5 tenders by risk_score
+    # 1. DELETE all existing reports
+    # ------------------------------------------------------------------
+    old_count = conn.execute("SELECT COUNT(*) FROM reports").fetchone()[0]
+    if old_count > 0:
+        print(f"[generate_reports] Deleting {old_count} existing reports...")
+        conn.execute("DELETE FROM reports")
+        conn.commit()
+        print(f"[generate_reports] Deleted {old_count} reports.")
+
+    # ------------------------------------------------------------------
+    # 2. Query top-5 tenders by risk_score from predictions table
     # ------------------------------------------------------------------
     rows = conn.execute(
         """
@@ -69,13 +147,8 @@ def main() -> None:
             p.tender_id,
             p.risk_score,
             p.risk_level,
-            t.title,
-            t.buyer_name,
-            t.value_amount,
-            f.feature_json,
-            f.icw_total_score
+            f.feature_json
         FROM predictions p
-        JOIN tenders t ON p.tender_id = t.tender_id
         JOIN features f ON p.tender_id = f.tender_id
         ORDER BY p.risk_score DESC
         LIMIT ?
@@ -89,52 +162,28 @@ def main() -> None:
 
     print(f"[generate_reports] Found {len(rows)} top-risk tenders to process.")
 
-    gen = ReportGenerator()
-
     inserted = 0
     for row in rows:
         tender_id: str = row["tender_id"]
-        title: str = row["title"] or "(tidak ada judul)"
-        buyer_name: str = row["buyer_name"] or "(tidak ada satuan kerja)"
-        value_amount: float = float(row["value_amount"] or 0.0)
-        risk_score_float: float = float(row["risk_score"] or 0.0)
+        risk_score_float: float = float(row["risk_score"])
+        risk_level_en: str = row["risk_level"]
+        feature_json: str = row["feature_json"]
 
         print(
             f"  Generating report for {tender_id}  "
-            f"(risk={risk_score_float:.3f}, buyer={buyer_name})"
+            f"(risk={risk_score_float:.3f}, level={risk_level_en})"
         )
 
-        oracle_result = _make_dummy_oracle(tender_id)
-
-        tender_data = {
-            "nama_paket": title,
-            "satuan_kerja": buyer_name,
-            "nilai_hps": value_amount,
-        }
-
-        result = gen.generate(
-            oracle_result=oracle_result,
-            tender_data=tender_data,
-            tender_id=tender_id,
-        )
-
+        # Build report content directly from predictions
+        content = build_report_content(tender_id, risk_level_en, risk_score_float, feature_json)
+        
         report_id = f"RPT-{uuid4().hex[:8].upper()}"
-        content_json = json.dumps(
-            {
-                "risk_level": result.risk_level,
-                "risk_score": result.risk_score,
-                "evidence_count": result.evidence_count,
-                "recommendations": result.recommendations,
-                "sections": result.sections,
-                "report_text": result.report_text,
-            },
-            ensure_ascii=False,
-        )
+        content_json = json.dumps(content, ensure_ascii=False)
         generated_at = datetime.now(timezone.utc).isoformat()
 
         conn.execute(
             """
-            INSERT OR REPLACE INTO reports
+            INSERT INTO reports
                 (report_id, tender_id, report_type, content, generated_at)
             VALUES (?, ?, ?, ?, ?)
             """,
@@ -142,7 +191,8 @@ def main() -> None:
         )
         conn.commit()
         inserted += 1
-        print(f"     OK Inserted {report_id}  risk_level={result.risk_level}")
+        risk_level_id = RISK_LEVEL_MAP.get(risk_level_en, "Aman")
+        print(f"     OK Inserted {report_id}  risk_level={risk_level_id}")
 
     # ------------------------------------------------------------------
     # 3. Verify
