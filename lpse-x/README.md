@@ -1,142 +1,99 @@
-# LPSE-X — Platform Forensik Pengadaan Berbasis XAI
+<div align="center">
 
-> **Find IT! 2026 UGM — Track C: "The Explainable Oracle"**  
-> Sistem deteksi anomali pengadaan pemerintah yang **dapat menjelaskan keputusannya** menggunakan Oracle Sandwich XAI.
+# LPSE-X
 
----
+### Platform Forensik Pengadaan Pemerintah Berbasis Explainable AI
 
-## Daftar Isi
+[![Find IT! 2026](https://img.shields.io/badge/Find%20IT!%202026-Track%20C%3A%20XAI-6366f1?style=for-the-badge&logo=graduation-cap)](https://findit.ugm.ac.id)
+[![Python](https://img.shields.io/badge/Python-3.11-3b82f6?style=for-the-badge&logo=python)](https://python.org)
+[![React](https://img.shields.io/badge/React-18-06b6d4?style=for-the-badge&logo=react)](https://react.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-22c55e?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![License](https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge)](LICENSE)
 
-- [Ringkasan](#ringkasan)
-- [Arsitektur](#arsitektur)
-- [Persyaratan Sistem](#persyaratan-sistem)
-- [Instalasi & Setup](#instalasi--setup)
-- [Menjalankan Sistem](#menjalankan-sistem)
-- [Struktur Proyek](#struktur-proyek)
-- [Data & Model](#data--model)
-- [API Endpoints](#api-endpoints)
-- [Testing](#testing)
-- [Konteks Hackathon](#konteks-hackathon)
+> **"The Explainable Oracle"** — Deteksi anomali pengadaan pemerintah yang **dapat menjelaskan setiap keputusannya** melalui 5 lapisan XAI independen. 100% offline. Zero cloud dependency.
+
+</div>
 
 ---
 
-## Ringkasan
+## Screenshots
 
-LPSE-X adalah platform forensik pengadaan pemerintah yang menggunakan **Explainable AI (XAI)** untuk mendeteksi potensi kecurangan dalam proses tender. Tidak seperti sistem blackbox biasa, LPSE-X menjelaskan *mengapa* sebuah tender dicurigai melalui 5 lapisan analisis independen:
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/01-dashboard.png" alt="Dashboard — Risk Overview"/>
+      <p align="center"><b>Dashboard</b> — Tabel tender real-time dengan skor risiko, badge risk level, dan ScoreBar per baris</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/02-tender-detail.png" alt="Oracle Sandwich XAI"/>
+      <p align="center"><b>Oracle Sandwich XAI</b> — 5-lapisan penjelasan: SHAP, Anchors, DiCE, Benford, Leiden</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/03-cartel-graph.png" alt="Cartel Graph — Vendor Network"/>
+      <p align="center"><b>Cartel Graph</b> — Jaringan co-bidding vendor dengan deteksi komunitas Leiden</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/04-risk-map.png" alt="Risk Map — Indonesia"/>
+      <p align="center"><b>Risk Map</b> — Peta risiko geografis seluruh Indonesia dengan marker berwarna per level</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/05-reports.png" alt="Pre-Investigation Reports"/>
+      <p align="center"><b>Reports</b> — Laporan pra-investigasi format IIA 2025, pre-generated per tender</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/06-config-panel.png" alt="Dynamic Injection Config Panel"/>
+      <p align="center"><b>Config Panel</b> — Dynamic Injection runtime tanpa restart server (fitur wajib kompetisi)</p>
+    </td>
+  </tr>
+</table>
 
-| Layer | Metode | Output |
-|-------|--------|--------|
-| **SHAP** | Feature importance | Fitur mana yang mendorong risiko |
-| **Anchors** | Rule extraction | Aturan if-then yang dapat dipertanggungjawabkan |
-| **Benford's Law** | Digit distribution | Deteksi manipulasi angka |
-| **Leiden Graph** | Community detection | Jaringan kartel vendor |
-| **DiCE** | Counterfactual | "Jika X berubah, risiko turun ke Y" |
+---
+
+## Apa itu LPSE-X?
+
+LPSE-X adalah platform forensik pengadaan pemerintah yang mendeteksi potensi kecurangan tender menggunakan **Explainable AI (XAI)**. Berbeda dari sistem blackbox biasa, LPSE-X menjelaskan *mengapa* sebuah tender dicurigai melalui **Oracle Sandwich** — 5 lapisan analisis independen yang dapat dipertanggungjawabkan.
+
+### Oracle Sandwich — 5 Lapisan XAI
+
+| # | Layer | Metode | Output |
+|---|-------|--------|--------|
+| 1 | **SHAP** | Feature importance (Shapley values) | Fitur mana yang paling mendorong skor risiko |
+| 2 | **Anchors** | Rule extraction | Aturan if-then yang dapat dijelaskan ke publik |
+| 3 | **Benford's Law** | Digit distribution analysis | Deteksi manipulasi angka pada nilai HPS |
+| 4 | **Leiden Graph** | Community detection | Jaringan kartel vendor co-bidding |
+| 5 | **DiCE** | Counterfactual explanation | *"Jika nilai HPS turun 20%, risiko turun dari 86% ke 41%"* |
 
 ### Fitur Utama
 
-- **1.050 tender** dianalisis dengan skor risiko real-time
-- **8 komunitas kartel** vendor terdeteksi via Leiden algorithm
-- **5 laporan pra-investigasi** format IIA 2025 pre-generated
-- **100% offline** — tidak ada API eksternal, berjalan dari folder tunggal
-- **Dynamic Injection** — parameter bisa diubah tanpa restart server
-- **Auto port detection** — tidak ada port hardcoded
+| Fitur | Detail |
+|-------|--------|
+| 📊 **1.050 Tender** | Dianalisis real-time dengan skor risiko XGBoost + Isolation Forest ensemble |
+| 🕸️ **8 Komunitas Kartel** | Terdeteksi via Leiden algorithm dari pola co-bidding vendor |
+| 📋 **5 Laporan IIA 2025** | Pre-generated laporan pra-investigasi format standar audit internasional |
+| 🔒 **100% Offline** | Zero API eksternal, berjalan dari satu folder, portable bundle |
+| ⚡ **Dynamic Injection** | Ubah parameter runtime via `PUT /api/config/inject` tanpa restart server |
+| 🔍 **Privacy by Design** | NPWP hanya disimpan sebagai SHA-256 hash + 4 digit terakhir |
 
 ---
 
-## Arsitektur
+## Tech Stack
 
-```
-lpse-x/
-├── backend/          # FastAPI + Python ML
-│   ├── api/          # REST endpoints
-│   ├── ml/           # XGBoost + IForest prediction
-│   ├── reports/      # IIA 2025 report generator (Jinja2)
-│   └── config/       # Runtime config + Dynamic Injection
-├── frontend/         # React + TypeScript + Vite
-│   └── src/pages/    # Dashboard, TenderDetail, CartelGraph, RiskMap, Reports
-├── data/
-│   └── lpse_x.db     # SQLite: tenders(1050), predictions(1050), communities(8)
-├── models/
-│   ├── xgboost.ubj   # XGBoost model (pre-trained, seed=42)
-│   └── iforest.pkl   # Isolation Forest model
-└── scripts/          # batch_predict, seed_cobidding, generate_reports
-```
+<div align="center">
 
-**Tech Stack:**
-- Backend: Python 3.11, FastAPI, aiosqlite, XGBoost, SHAP, Jinja2
-- Frontend: React 18, TypeScript, Vite, Recharts, Cytoscape.js, Leaflet
-- Database: SQLite (via aiosqlite, no ORM)
-- ML: XGBoost + Isolation Forest ensemble, seed=42
+| Layer | Teknologi |
+|-------|-----------|
+| **Frontend** | React 18 · TypeScript · Vite · Tailwind CSS v4 · Plotly.js · Leaflet · react-force-graph |
+| **Backend** | Python 3.11 · FastAPI · aiosqlite · Uvicorn |
+| **ML / XAI** | XGBoost · Isolation Forest · SHAP · DiCE-ml · Anchor-Explanations |
+| **Graph** | NetworkX · Leiden Algorithm (leidenalg) |
+| **Database** | SQLite via aiosqlite (no ORM, raw SQL) |
+| **Reports** | Jinja2 templates · IIA 2025 format |
 
----
-
-## Persyaratan Sistem
-
-- Python 3.11+
-- Node.js 18+ (untuk build frontend)
-- Windows / Linux / macOS
-- Tidak membutuhkan koneksi internet
-
----
-
-## Instalasi & Setup
-
-### 1. Clone & Setup Python Environment
-
-```bash
-git clone <repo-url>
-cd lpse-x
-
-# Buat virtual environment
-python -m venv .venv
-
-# Aktifkan (Windows)
-.venv\Scripts\activate
-# Aktifkan (Linux/Mac)
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 2. Setup Frontend
-
-```bash
-cd frontend
-npm install
-npm run build
-cd ..
-```
-
-### 3. Jalankan Scripts Seeding (opsional — data sudah ada di DB)
-
-```bash
-# Pre-compute prediksi untuk semua tender
-.venv/Scripts/python.exe scripts/batch_predict.py
-
-# Seed komunitas co-bidding
-.venv/Scripts/python.exe scripts/seed_cobidding.py
-
-# Generate laporan pra-investigasi top-5
-.venv/Scripts/python.exe scripts/generate_reports.py
-```
-
----
-
-## Menjalankan Sistem
-
-```bash
-# Start backend + serve frontend (auto port detection 8000-8099)
-.venv\Scripts\python.exe start_lpse_x.py
-```
-
-Buka browser ke `http://localhost:<port>` (port ditampilkan di terminal).
-
-Atau jalankan backend saja:
-
-```bash
-.venv\Scripts\python.exe -m backend.main
-```
+</div>
 
 ---
 
@@ -145,121 +102,159 @@ Atau jalankan backend saja:
 ```
 lpse-x/
 ├── backend/
-│   ├── api/
-│   │   └── routes/
-│   │       ├── tenders.py        # GET /api/tenders, GET /api/tenders/{id}
-│   │       ├── reports.py        # GET/POST /api/reports/{tender_id}
-│   │       ├── graph.py          # GET /api/graph/communities
-│   │       ├── config.py         # GET/PUT /api/config, PUT /api/config/inject
-│   │       └── oracle.py         # POST /api/oracle/explain
+│   ├── api/routes/
+│   │   ├── tenders.py        # GET /api/tenders, GET /api/tenders/{id}
+│   │   ├── oracle.py         # POST /api/oracle/explain (5-layer XAI)
+│   │   ├── reports.py        # GET/POST /api/reports/{tender_id}
+│   │   ├── graph.py          # GET /api/graph/communities
+│   │   └── config.py         # GET/PUT /api/config, GET /api/config/log
 │   ├── ml/
-│   │   ├── predict.py            # XGBoost + IForest ensemble
-│   │   └── features.py           # 82-feature extractor
-│   ├── reports/
-│   │   ├── generator.py          # ReportGenerator (IIA 2025 format)
-│   │   └── templates/            # Jinja2 templates
+│   │   ├── predict.py        # XGBoost + IForest ensemble predictor
+│   │   └── features.py       # 82-feature extractor (ICW scoring methodology)
 │   ├── config/
-│   │   └── runtime.py            # Dynamic Injection config
-│   └── main.py                   # FastAPI app entrypoint
+│   │   └── runtime.py        # Dynamic Injection — runtime config management
+│   └── main.py               # FastAPI app entrypoint
 ├── frontend/
 │   └── src/
-│       ├── pages/
-│       │   ├── Dashboard.tsx     # Tabel tender + risk scores
-│       │   ├── TenderDetail.tsx  # Detail XAI per tender
-│       │   ├── CartelGraph.tsx   # Visualisasi komunitas kartel
-│       │   ├── RiskMap.tsx       # Peta risiko per wilayah
-│       │   └── Reports.tsx       # Laporan pra-investigasi
-│       ├── api/client.ts         # API client (listTenders, getTender)
-│       └── types/models.ts       # TypeScript type definitions
+│       ├── components/
+│       │   ├── Layout.tsx    # Dark sidebar + navigation
+│       │   └── ui/           # Card, Badge, Button, Skeleton, SectionHeader
+│       └── pages/
+│           ├── Dashboard.tsx     # Risk overview table
+│           ├── TenderDetail.tsx  # Oracle Sandwich XAI detail
+│           ├── CartelGraph.tsx   # Vendor network visualization
+│           ├── RiskMap.tsx       # Geographic risk map
+│           ├── Reports.tsx       # Pre-investigation reports
+│           └── ConfigPanel.tsx   # Dynamic injection interface
 ├── data/
-│   └── lpse_x.db                 # SQLite database
+│   └── lpse_x.db             # SQLite: tenders(1050), predictions(1050), communities(8)
 ├── models/
-│   ├── xgboost.ubj               # XGBoost model binary
-│   ├── iforest.pkl               # Isolation Forest model
-│   └── iforest.json              # Feature names (21 features)
-├── scripts/
-│   ├── batch_predict.py          # Batch prediction untuk semua tender
-│   ├── seed_cobidding.py         # Seed komunitas co-bidding
-│   └── generate_reports.py       # Pre-generate laporan pra-investigasi
-├── tests/                        # Pytest test suite
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── DEMO_SCRIPT.md            # Script demo 10 menit
-│   └── TALKING_POINTS.md
-└── pyproject.toml
+│   ├── xgboost.ubj           # XGBoost model (pre-trained, seed=42)
+│   └── iforest.pkl           # Isolation Forest model
+└── scripts/
+    ├── batch_predict.py      # Pre-compute predictions for all tenders
+    ├── seed_cobidding.py     # Seed community co-bidding graph
+    └── generate_reports.py   # Pre-generate IIA 2025 reports
+```
+
+---
+
+## Instalasi & Menjalankan
+
+### Prasyarat
+
+- Python 3.11+
+- Node.js 18+
+- Windows / Linux / macOS
+
+### Setup (satu kali)
+
+```bash
+# 1. Clone repository
+git clone https://github.com/vaskoyudha/LPSE-X.git
+cd LPSE-X/lpse-x
+
+# 2. Setup Python environment
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# Linux / macOS
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# 3. Build frontend
+cd frontend
+npm install
+npm run build
+cd ..
+```
+
+### Jalankan
+
+```bash
+# Start backend + frontend (auto port detection 8000–8099)
+.venv\Scripts\python.exe start_lpse_x.py
+```
+
+Buka browser ke `http://localhost:<port>` (port ditampilkan di terminal).
+
+> **Atau jalankan backend saja (development):**
+> ```bash
+> .venv\Scripts\python.exe -m uvicorn backend.main:app --port 8009 --reload
+> cd frontend && npm run dev
+> ```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| `GET` | `/api/health` | Health check + model status |
+| `GET` | `/api/tenders` | List tender (pagination, filter by risk_level) |
+| `GET` | `/api/tenders/{id}` | Detail tender + 82 features + prediction |
+| `POST` | `/api/oracle/explain` | **Jalankan Oracle Sandwich** (5-layer XAI) |
+| `GET` | `/api/graph/communities` | 8 komunitas kartel vendor |
+| `GET` | `/api/reports/{tender_id}` | Generate laporan pra-investigasi IIA 2025 |
+| `GET` | `/api/config` | Lihat konfigurasi runtime saat ini |
+| `PUT` | `/api/config/inject` | **Dynamic Injection** — ubah parameter tanpa restart |
+| `GET` | `/api/config/log` | Audit trail semua injeksi konfigurasi |
+
+### Contoh: Dynamic Injection
+
+```bash
+curl -X PUT http://localhost:8009/api/config/inject \
+  -H "Content-Type: application/json" \
+  -d '{
+    "risk_threshold": 0.5,
+    "anomaly_method": "xgboost",
+    "custom_params": {"judge_note": "review", "demo_mode": true}
+  }'
+```
+
+### Contoh: Oracle Sandwich XAI
+
+```bash
+curl -X POST http://localhost:8009/api/oracle/explain \
+  -H "Content-Type: application/json" \
+  -d '{"tender_id": "SYN-2018-00627"}'
 ```
 
 ---
 
 ## Data & Model
 
-### Database (data/lpse_x.db)
+### Database (`data/lpse_x.db`)
 
 | Tabel | Rows | Deskripsi |
 |-------|------|-----------|
-| `tenders` | 1.050 | Data tender LPSE (SYN-* + LP-2021-*) |
-| `features` | 1.050 | 82 fitur per tender (ICW scoring) |
-| `predictions` | 1.050 | Skor risiko XGBoost+IForest |
-| `communities` | 8 | Komunitas vendor co-bidding |
-| `reports` | 5 | Laporan pra-investigasi top-5 |
+| `tenders` | 1.050 | Data tender LPSE |
+| `features` | 1.050 | 82 fitur per tender (ICW methodology) |
+| `predictions` | 1.050 | Skor risiko XGBoost + IForest ensemble |
+| `communities` | 8 | Komunitas vendor co-bidding (Leiden) |
+| `reports` | 5 | Laporan pra-investigasi IIA 2025 |
 
 ### Distribusi Risiko
 
 | Level | Count | % |
 |-------|-------|---|
-| High | 196 | 18.7% |
-| Medium | 408 | 38.9% |
-| Low | 446 | 42.5% |
+| 🔴 High | 196 | 18.7% |
+| 🟡 Medium | 408 | 38.9% |
+| 🟢 Low | 446 | 42.5% |
 
 ### Top-5 Tender Risiko Tertinggi
 
-| Tender ID | Risk Score | Buyer |
-|-----------|-----------|-------|
-| SYN-2018-00627 | 0.864 | Kota Pematang Siantar |
-| SYN-2024-00563 | 0.852 | Kabupaten Sumba Timur |
-| SYN-2018-00445 | 0.847 | Kabupaten Bone Bolango |
-| SYN-2022-00432 | 0.823 | Kabupaten Ogan Komering Ulu Timur |
-| SYN-2023-00074 | 0.819 | Kementerian Pekerjaan Umum |
-
----
-
-## API Endpoints
-
-| Method | Path | Deskripsi |
-|--------|------|-----------|
-| `GET` | `/api/tenders` | List tender dengan pagination + filter |
-| `GET` | `/api/tenders/{id}` | Detail tender + features + prediction |
-| `GET` | `/api/graph/communities` | Komunitas kartel vendor |
-| `GET` | `/api/reports/{tender_id}` | Generate laporan pra-investigasi |
-| `POST` | `/api/reports/{tender_id}` | Generate laporan dari oracle result |
-| `GET` | `/api/config` | Lihat config runtime |
-| `PUT` | `/api/config/inject` | Dynamic Injection parameter |
-| `POST` | `/api/oracle/explain` | XAI explanation per tender |
-
-### Contoh: List Tender
-
-```bash
-curl "http://localhost:8000/api/tenders?page=1&page_size=10&risk_level=high"
-```
-
-Response:
-```json
-{
-  "items": [...],
-  "total": 196,
-  "page": 1,
-  "page_size": 10,
-  "timestamp": "2026-03-02T..."
-}
-```
-
-### Contoh: Dynamic Injection
-
-```bash
-curl -X PUT http://localhost:8000/api/config/inject \
-  -H "Content-Type: application/json" \
-  -d '{"risk_threshold": 0.5, "custom_params": {"judge_note": "review"}}'
-```
+| Tender ID | Risk Score | Satuan Kerja |
+|-----------|-----------|--------------|
+| SYN-2018-00627 | **86.4%** | Kota Pematang Siantar |
+| SYN-2024-00563 | **85.2%** | Kabupaten Sumba Timur |
+| SYN-2018-00445 | **84.7%** | Kabupaten Bone Bolango |
+| SYN-2022-00432 | **82.3%** | Kabupaten Ogan Komering Ulu Timur |
+| SYN-2023-00074 | **81.9%** | Kementerian Pekerjaan Umum |
 
 ---
 
@@ -269,33 +264,37 @@ curl -X PUT http://localhost:8000/api/config/inject \
 # Jalankan semua tests
 .venv\Scripts\python.exe -m pytest tests/ -v
 
-# Tests spesifik untuk tenders API
+# Tests spesifik
 .venv\Scripts\python.exe -m pytest tests/test_tenders_api.py -v
+.venv\Scripts\python.exe -m pytest tests/test_oracle.py -v
 ```
 
 ---
 
 ## Konteks Hackathon
 
-**Event**: Find IT! 2026 — Gadjah Mada University  
-**Track**: Track C — "The Explainable Oracle"  
-**Tim**: LPSE-X  
+**Event**: [Find IT! 2026](https://findit.ugm.ac.id) — Universitas Gadjah Mada  
+**Track**: Track C — *"The Explainable Oracle"*
 
 ### Kriteria Penilaian
 
-| Kriteria | Bobot | Implementasi |
-|---------|-------|-------------|
-| XAI Quality | 40% | 5-layer Oracle Sandwich (SHAP, Anchors, DiCE, Leiden, Benford) |
-| Completeness | 30% | Data pipeline → ML → XAI → Laporan, end-to-end |
-| Offline Capability | 20% | Zero cloud, portable bundle, auto port-detection |
-| Code Quality | 10% | Pytest suite, seed=42, no hardcoded params, audit trail |
+| Kriteria | Bobot | Implementasi LPSE-X |
+|---------|-------|---------------------|
+| **XAI Quality** | 40% | Oracle Sandwich: 5 lapisan independen (SHAP, Anchors, DiCE, Leiden, Benford) |
+| **Completeness** | 30% | Pipeline penuh: data → feature extraction → ML → XAI → laporan IIA 2025 |
+| **Offline Capability** | 20% | Zero cloud, single-folder bundle, auto port detection |
+| **Code Quality** | 10% | Pytest suite, seed=42, no hardcoded params, audit trail, Privacy by Design |
 
 ### Privacy by Design
 
-- NPWP tidak disimpan mentah — hanya SHA-256 hash + 4 digit terakhir
-- Semua data di SQLite lokal — tidak ada cloud storage
-- Tidak ada API key atau credential eksternal
+- **NPWP**: Hanya disimpan sebagai `SHA-256(npwp) + 4 digit terakhir` — tidak ada data mentah
+- **Storage**: Semua data di SQLite lokal — tidak ada cloud, tidak ada API key eksternal
+- **Audit Trail**: Setiap injeksi konfigurasi dicatat di `/api/config/log`
 
 ---
 
-*Dikembangkan untuk Find IT! 2026 — Gadjah Mada University*
+<div align="center">
+
+*Dikembangkan untuk Find IT! 2026 — Universitas Gadjah Mada*
+
+</div>
