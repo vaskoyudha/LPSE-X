@@ -40,7 +40,7 @@ cd C:\Hackthon\lpse-x
 ### Menit 3–4: Drill-Down Tender Berisiko Tinggi
 
 **Yang ditunjukkan:**
-- Klik tender berisiko tinggi (risk score ≥ 0.85)
+ Klik tender berisiko tinggi: **SYN-2018-00627** (risk score 0.864)
 - Halaman detail → tampilkan **Oracle Sandwich XAI** (5 layer)
 
 **Poin utama per layer:**
@@ -64,14 +64,14 @@ cd C:\Hackthon\lpse-x
 - Klik node vendor → tampilkan `win_rotation_pattern`, `repeat_pairing_index`
 
 **Yang dikatakan:**
-> "Leiden community detection menemukan 12 komunitas vendor yang co-bid secara berulang. Komunitas ini menunjukkan pola rotasi kemenangan — anggotanya bergantian menang secara mencurigakan."
+> "Leiden community detection menemukan 8 komunitas vendor yang co-bid secara berulang. Komunitas dengan suspicion score tertinggi berada di Kota Surabaya — menunjukkan pola rotasi kemenangan di antara 4 vendor yang terlibat."
 
 ---
 
 ### Menit 6: Laporan Pra-Investigasi (IIA 2025 Format)
 
 **Yang ditunjukkan:**
-- Navigasi ke `/reports` → klik "Generate Report" untuk tender yang sama
+ Navigasi ke `/reports` → pilih dari daftar **Tender Risiko Tinggi** (SYN-2018-00627, SYN-2024-00563, SYN-2018-00445, SYN-2022-00432, SYN-2023-00074)
 - Laporan auto-generate dalam Bahasa Indonesia
 - Sections: Temuan Utama, Analisis Risiko, Rekomendasi, Lampiran Bukti
 

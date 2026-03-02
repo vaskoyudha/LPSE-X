@@ -28,7 +28,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import config_router
-from backend.api.routes import health, inference, xai, graph, reports
+from backend.api.routes import health, inference, xai, graph, reports, tenders
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,7 @@ app.include_router(inference.router)        # /api/predict POST
 app.include_router(xai.router)              # /api/xai/* POST/GET
 app.include_router(graph.router)            # /api/graph GET, /api/graph/vendor/{id} GET
 app.include_router(reports.router)          # /api/reports/{id} GET/POST
+app.include_router(tenders.router)          # /api/tenders GET, /api/tenders/{id} GET
 
 
 # ---------------------------------------------------------------------------

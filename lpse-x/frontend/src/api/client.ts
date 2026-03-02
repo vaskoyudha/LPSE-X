@@ -12,6 +12,8 @@ import type {
   GraphResponse,
   VendorCommunityResponse,
   ReportResult,
+  TenderListResponse,
+  TenderDetailResponse,
 } from '../types/models'
 
 const apiClient = axios.create({
@@ -139,6 +141,26 @@ export async function generateReport(
     oracle_result: oracleResult,
     tender_data: tenderData,
   })
+  return response.data
+}
+
+// ============================================================================
+// Tenders
+// ============================================================================
+
+export interface ListTendersParams {
+  page?: number
+  page_size?: number
+  risk_level?: string
+}
+
+export async function listTenders(params?: ListTendersParams): Promise<TenderListResponse> {
+  const response = await apiClient.get<TenderListResponse>('/api/tenders', { params })
+  return response.data
+}
+
+export async function getTender(tenderId: string): Promise<TenderDetailResponse> {
+  const response = await apiClient.get<TenderDetailResponse>(`/api/tenders/${tenderId}`)
   return response.data
 }
 

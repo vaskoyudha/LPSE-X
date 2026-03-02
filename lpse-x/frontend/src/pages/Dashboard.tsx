@@ -1,96 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { getHealth, predictTender } from '../api/client'
+import { getHealth, listTenders } from '../api/client'
 import { RISK_BG, RISK_COLORS } from '../types/models'
-import type { RiskPrediction } from '../types/models'
+import type { TenderWithRisk } from '../types/models'
 
 // ============================================================================
-// Mock/Demo tender data for hackathon demo (real data comes from pipeline)
+// Risk level mapping: DB stores "high"/"medium"/"low", UI shows Bahasa labels
 // ============================================================================
 
-const DEMO_TENDERS = [
-  {
-    tender_id: 'ID-2024-0001',
-    title: 'Konstruksi Gedung Kantor Dinas PUPR',
-    buyer: 'Dinas PUPR Kabupaten Sleman',
-    year: 2024,
-    amount: 4_980_000_000,
-    features: {
-      n_bidders: 1.0,
-      price_ratio: 0.995,
-      bid_spread: 0.005,
-      winner_bid_rank: 1.0,
-      hhi: 0.95,
-      log_amount: 21.33,
-    },
-    icw_raw_score: 78.5,
-  },
-  {
-    tender_id: 'ID-2024-0002',
-    title: 'Rehabilitasi Jalan Raya Bantul–Yogyakarta',
-    buyer: 'Dinas Bina Marga Bantul',
-    year: 2024,
-    amount: 1_200_000_000,
-    features: {
-      n_bidders: 5.0,
-      price_ratio: 0.87,
-      bid_spread: 0.13,
-      winner_bid_rank: 2.0,
-      hhi: 0.25,
-      log_amount: 20.9,
-    },
-    icw_raw_score: 22.0,
-  },
-  {
-    tender_id: 'ID-2024-0003',
-    title: 'Pengadaan Meja Kursi Kantor Pemerintah',
-    buyer: 'Sekretariat Daerah Gunungkidul',
-    year: 2024,
-    amount: 350_000_000,
-    features: {
-      n_bidders: 1.0,
-      price_ratio: 0.999,
-      bid_spread: 0.001,
-      winner_bid_rank: 1.0,
-      hhi: 1.0,
-      log_amount: 19.67,
-    },
-    icw_raw_score: 91.2,
-  },
-  {
-    tender_id: 'ID-2024-0004',
-    title: 'Jasa Konsultansi AMDAL Kawasan Industri',
-    buyer: 'BPPD Kota Yogyakarta',
-    year: 2024,
-    amount: 2_800_000_000,
-    features: {
-      n_bidders: 3.0,
-      price_ratio: 0.92,
-      bid_spread: 0.08,
-      winner_bid_rank: 1.0,
-      hhi: 0.45,
-      log_amount: 21.75,
-    },
-    icw_raw_score: 45.0,
-  },
-  {
-    tender_id: 'ID-2024-0005',
-    title: 'Penyediaan Alat Kesehatan Puskesmas',
-    buyer: 'Dinas Kesehatan Kulon Progo',
-    year: 2024,
-    amount: 5_600_000_000,
-    features: {
-      n_bidders: 2.0,
-      price_ratio: 0.985,
-      bid_spread: 0.015,
-      winner_bid_rank: 1.0,
-      hhi: 0.72,
-      log_amount: 22.45,
-    },
-    icw_raw_score: 66.5,
-  },
-]
+const RISK_LEVEL_LABEL: Record<string, string> = {
+  high: 'Risiko Tinggi',
+  medium: 'Perlu Pantauan',
+  low: 'Aman',
+}
 
 // ============================================================================
 // Helper components
@@ -101,10 +24,11 @@ interface RiskBadgeProps {
 }
 
 function RiskBadge({ level }: RiskBadgeProps): React.ReactElement {
-  const cls = RISK_BG[level] ?? 'bg-gray-100 text-gray-700'
+  const label = RISK_LEVEL_LABEL[level] ?? level
+  const cls = RISK_BG[label] ?? 'bg-gray-100 text-gray-700'
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cls}`}>
-      {level}
+      {label}
     </span>
   )
 }
@@ -161,31 +85,14 @@ function ScoreBar({ score }: { score: number }): React.ReactElement {
 // Main Dashboard
 // ============================================================================
 
-interface TenderRow {
-  tender_id: string
-  title: string
-  buyer: string
-  year: number
-  amount: number
-  prediction: RiskPrediction | null
-  loading: boolean
-  error: boolean
-}
+const PAGE_SIZE = 20
 
 export function Dashboard(): React.ReactElement {
-  const [rows, setRows] = useState<TenderRow[]>(
-    DEMO_TENDERS.map((t) => ({
-      tender_id: t.tender_id,
-      title: t.title,
-      buyer: t.buyer,
-      year: t.year,
-      amount: t.amount,
-      prediction: null,
-      loading: false,
-      error: false,
-    })),
-  )
-  const [allLoading, setAllLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [tenders, setTenders] = useState<TenderWithRisk[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   // Health check
   const healthQuery = useQuery({
@@ -195,46 +102,42 @@ export function Dashboard(): React.ReactElement {
     staleTime: 60_000,
   })
 
-  // Run all predictions
-  async function runAllPredictions(): Promise<void> {
-    setAllLoading(true)
-    const results = await Promise.allSettled(
-      DEMO_TENDERS.map((t) =>
-        predictTender({
-          tender_id: t.tender_id,
-          features: t.features,
-          icw_raw_score: t.icw_raw_score,
-        }),
-      ),
-    )
-    setRows((prev) =>
-      prev.map((row, i) => {
-        const r = results[i]
-        if (r.status === 'fulfilled') {
-          return { ...row, prediction: r.value, loading: false, error: false }
+  // Fetch tenders on page change
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setFetchError(null)
+    listTenders({ page, page_size: PAGE_SIZE })
+      .then((resp) => {
+        if (!cancelled) {
+          setTenders(resp.items)
+          setTotal(resp.total)
         }
-        return { ...row, prediction: null, loading: false, error: true }
-      }),
-    )
-    setAllLoading(false)
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setFetchError(err instanceof Error ? err.message : 'Gagal memuat data tender')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [page])
+
+  // Compute risk stat counts from current page
+  const counts = { low: 0, medium: 0, high: 0 }
+  for (const t of tenders) {
+    const lvl = t.prediction?.risk_level
+    if (lvl === 'high') counts.high++
+    else if (lvl === 'medium') counts.medium++
+    else if (lvl === 'low') counts.low++
   }
 
-  // Compute stats from predictions
-  const withPredictions = rows.filter((r) => r.prediction !== null)
-  const counts = {
-    'Aman': 0,
-    'Perlu Pantauan': 0,
-    'Risiko Tinggi': 0,
-    'Risiko Kritis': 0,
-  }
-  for (const row of withPredictions) {
-    if (row.prediction) {
-      const lvl = row.prediction.risk_level as keyof typeof counts
-      if (lvl in counts) counts[lvl]++
-    }
-  }
+  const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const formatAmount = (n: number): string => {
+  const formatAmount = (n: number | undefined): string => {
+    if (n === undefined || n === null) return '—'
     if (n >= 1_000_000_000) return `Rp ${(n / 1_000_000_000).toFixed(2)} M`
     if (n >= 1_000_000) return `Rp ${(n / 1_000_000).toFixed(1)} Jt`
     return `Rp ${n.toLocaleString('id-ID')}`
@@ -250,75 +153,60 @@ export function Dashboard(): React.ReactElement {
             Analisis Risiko Pengadaan Pemerintah — LPSE-X v1.0
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Backend status indicator */}
-          <div className="flex items-center gap-2 text-sm">
-            <span
-              className={`inline-block w-2.5 h-2.5 rounded-full ${
-                healthQuery.isSuccess
-                  ? 'bg-green-500'
-                  : healthQuery.isError
-                  ? 'bg-red-500'
-                  : 'bg-amber-400 animate-pulse'
-              }`}
-            />
-            <span className="text-slate-600">
-              {healthQuery.isSuccess
-                ? `Backend OK • v${healthQuery.data.version}`
+        <div className="flex items-center gap-2 text-sm">
+          <span
+            className={`inline-block w-2.5 h-2.5 rounded-full ${
+              healthQuery.isSuccess
+                ? 'bg-green-500'
                 : healthQuery.isError
-                ? 'Backend offline'
-                : 'Connecting...'}
-            </span>
-          </div>
-          <button
-            onClick={() => { void runAllPredictions() }}
-            disabled={allLoading}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg
-                       hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed
-                       transition-colors flex items-center gap-2"
-          >
-            {allLoading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                </svg>
-                Menganalisis...
-              </>
-            ) : (
-              <>🔍 Analisis Semua Tender</>
-            )}
-          </button>
+                ? 'bg-red-500'
+                : 'bg-amber-400 animate-pulse'
+            }`}
+          />
+          <span className="text-slate-600">
+            {healthQuery.isSuccess
+              ? `Backend OK • v${healthQuery.data.version}`
+              : healthQuery.isError
+              ? 'Backend offline'
+              : 'Connecting...'}
+          </span>
         </div>
       </div>
 
-      {/* Risk summary cards (visible after predictions run) */}
-      {withPredictions.length > 0 && (
+      {/* Risk summary cards */}
+      {tenders.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Aman"
-            value={counts['Aman']}
+            value={counts.low}
             color={RISK_COLORS['Aman']}
             icon="✓"
           />
           <StatCard
             label="Perlu Pantauan"
-            value={counts['Perlu Pantauan']}
+            value={counts.medium}
             color={RISK_COLORS['Perlu Pantauan']}
             icon="⚠"
           />
           <StatCard
             label="Risiko Tinggi"
-            value={counts['Risiko Tinggi']}
+            value={counts.high}
             color={RISK_COLORS['Risiko Tinggi']}
             icon="🔴"
           />
           <StatCard
-            label="Risiko Kritis"
-            value={counts['Risiko Kritis']}
-            color={RISK_COLORS['Risiko Kritis']}
-            icon="🚨"
+            label="Total Halaman Ini"
+            value={tenders.length}
+            color="#64748b"
+            icon="📋"
           />
+        </div>
+      )}
+
+      {/* Error */}
+      {fetchError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+          <strong>Error:</strong> {fetchError}
         </div>
       )}
 
@@ -326,7 +214,9 @@ export function Dashboard(): React.ReactElement {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-700">Daftar Tender</h2>
-          <span className="text-sm text-slate-500">{rows.length} tender</span>
+          <span className="text-sm text-slate-500">
+            {loading ? 'Memuat...' : `${total.toLocaleString('id-ID')} total tender`}
+          </span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -342,7 +232,17 @@ export function Dashboard(): React.ReactElement {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {rows.map((row) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-10 text-center text-slate-400 text-sm">
+                    <svg className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-500" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                    </svg>
+                    Memuat data tender...
+                  </td>
+                </tr>
+              ) : tenders.map((row) => (
                 <tr
                   key={row.tender_id}
                   className="hover:bg-slate-50 transition-colors"
@@ -354,17 +254,13 @@ export function Dashboard(): React.ReactElement {
                     {row.title}
                   </td>
                   <td className="px-6 py-4 text-slate-600 max-w-xs truncate">
-                    {row.buyer}
+                    {row.buyer_name}
                   </td>
                   <td className="px-6 py-4 text-right font-medium text-slate-700 whitespace-nowrap">
-                    {formatAmount(row.amount)}
+                    {formatAmount(row.value_amount)}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {row.loading ? (
-                      <span className="text-slate-400 text-xs">Memproses...</span>
-                    ) : row.error ? (
-                      <span className="text-red-500 text-xs">Error</span>
-                    ) : row.prediction ? (
+                    {row.prediction ? (
                       <RiskBadge level={row.prediction.risk_level} />
                     ) : (
                       <span className="text-slate-400 text-xs">—</span>
@@ -372,7 +268,7 @@ export function Dashboard(): React.ReactElement {
                   </td>
                   <td className="px-6 py-4 w-40">
                     {row.prediction ? (
-                      <ScoreBar score={row.prediction.final_score} />
+                      <ScoreBar score={row.prediction.risk_score} />
                     ) : (
                       <span className="text-slate-300 text-xs">—</span>
                     )}
@@ -391,17 +287,34 @@ export function Dashboard(): React.ReactElement {
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Hint when no predictions loaded */}
-      {withPredictions.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
-          <p className="text-blue-700 text-sm">
-            Klik <strong>"Analisis Semua Tender"</strong> untuk menjalankan model AI dan
-            mendapatkan klasifikasi risiko.
-          </p>
-        </div>
-      )}
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <span className="text-sm text-slate-500">
+              Halaman {page} dari {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1 || loading}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg
+                           hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                ← Sebelumnya
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages || loading}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg
+                           hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Berikutnya →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

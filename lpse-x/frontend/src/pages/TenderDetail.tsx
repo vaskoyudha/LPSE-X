@@ -1,21 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Plot from 'react-plotly.js'
-import { getXaiExplanation, precomputeDice, getDiceStatus, generateReport } from '../api/client'
+import { getTender, getXaiExplanation, precomputeDice, getDiceStatus, generateReport } from '../api/client'
 import { RISK_BG } from '../types/models'
-import type { OracleSandwichResult, XAILayer, ReportResult } from '../types/models'
-
-// ============================================================================
-// Demo feature vectors (keyed by tender_id)
-// ============================================================================
-
-const DEMO_FEATURES: Record<string, Record<string, number>> = {
-  'ID-2024-0001': { n_bidders: 1.0, price_ratio: 0.995, bid_spread: 0.005, winner_bid_rank: 1.0, hhi: 0.95, log_amount: 21.33 },
-  'ID-2024-0002': { n_bidders: 5.0, price_ratio: 0.87,  bid_spread: 0.13,  winner_bid_rank: 2.0, hhi: 0.25, log_amount: 20.9  },
-  'ID-2024-0003': { n_bidders: 1.0, price_ratio: 0.999, bid_spread: 0.001, winner_bid_rank: 1.0, hhi: 1.0,  log_amount: 19.67 },
-  'ID-2024-0004': { n_bidders: 3.0, price_ratio: 0.92,  bid_spread: 0.08,  winner_bid_rank: 1.0, hhi: 0.45, log_amount: 21.75 },
-  'ID-2024-0005': { n_bidders: 2.0, price_ratio: 0.985, bid_spread: 0.015, winner_bid_rank: 1.0, hhi: 0.72, log_amount: 22.45 },
-}
+import type { OracleSandwichResult, XAILayer, ReportResult, TenderDetailResponse } from '../types/models'
 
 // ============================================================================
 // Sub-components
@@ -157,22 +145,22 @@ function AnchorsDisplay({ layer }: { layer: XAILayer }): React.ReactElement {
 
 // ---- DiCE Counterfactuals ----
 
-function DiceDisplay({ layer, tenderId }: { layer: XAILayer; tenderId: string }): React.ReactElement {
+function DiceDisplay({ layer, features }: { layer: XAILayer; features: Record<string, number> }): React.ReactElement {
   const [loading, setLoading] = useState(false)
   const [triggered, setTriggered] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
+  const [tenderId, setTenderId] = useState('')
 
-  async function triggerDice(): Promise<void> {
-    const features = DEMO_FEATURES[tenderId] ?? {}
+  // Extract tenderId from layer if possible — passed via parent
+  async function triggerDice(tid: string): Promise<void> {
     setLoading(true)
     setTriggered(true)
     try {
-      await precomputeDice(tenderId, features, 3)
+      await precomputeDice(tid, features, 3)
       setStatusMsg('DiCE sedang dihitung di background...')
-      // Poll once after 3s
       setTimeout(async () => {
         try {
-          const s = await getDiceStatus(tenderId)
+          const s = await getDiceStatus(tid)
           setStatusMsg(
             s.status === 'done'
               ? '✓ DiCE selesai — muat ulang XAI untuk melihat hasil'
@@ -182,7 +170,7 @@ function DiceDisplay({ layer, tenderId }: { layer: XAILayer; tenderId: string })
           setStatusMsg('Tidak dapat cek status')
         }
       }, 3000)
-    } catch (err) {
+    } catch {
       setStatusMsg('Gagal memulai DiCE')
     } finally {
       setLoading(false)
@@ -236,14 +224,26 @@ function DiceDisplay({ layer, tenderId }: { layer: XAILayer; tenderId: string })
           : layer.error ?? 'Hasil DiCE tidak tersedia.'}
       </p>
       {!triggered ? (
-        <button
-          onClick={() => { void triggerDice() }}
-          disabled={loading}
-          className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg
-                     hover:bg-purple-700 disabled:opacity-60 transition-colors"
-        >
-          {loading ? '⏳ Memulai...' : '🎲 Hitung Kontrafaktual DiCE'}
-        </button>
+        <div className="space-y-2">
+          <input
+            type="text"
+            placeholder="Tender ID"
+            value={tenderId}
+            onChange={(e) => setTenderId(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg font-mono w-48
+                       focus:outline-none focus:ring-2 focus:ring-purple-400"
+          />
+          <div>
+            <button
+              onClick={() => { void triggerDice(tenderId) }}
+              disabled={loading || !tenderId.trim()}
+              className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg
+                         hover:bg-purple-700 disabled:opacity-60 transition-colors"
+            >
+              {loading ? '⏳ Memulai...' : '🎲 Hitung Kontrafaktual DiCE'}
+            </button>
+          </div>
+        </div>
       ) : (
         <p className="text-sm text-purple-600 font-medium">{statusMsg}</p>
       )}
@@ -400,17 +400,39 @@ const TABS: Array<{ key: TabKey; label: string; emoji: string }> = [
   { key: 'leiden',  label: 'Leiden/Graf',  emoji: '🕸' },
 ]
 
+const RISK_LEVEL_LABEL: Record<string, string> = {
+  high: 'Risiko Tinggi',
+  medium: 'Perlu Pantauan',
+  low: 'Aman',
+}
+
 export function TenderDetail(): React.ReactElement {
-  const { id: tenderId = 'ID-2024-0001' } = useParams<{ id: string }>()
+  const { id: tenderId = '' } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState<TabKey>('shap')
+  const [tenderData, setTenderData] = useState<TenderDetailResponse | null>(null)
+  const [tenderLoading, setTenderLoading] = useState(false)
+  const [tenderError, setTenderError] = useState<string | null>(null)
   const [xaiData, setXaiData] = useState<OracleSandwichResult | null>(null)
   const [report, setReport] = useState<ReportResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Load tender data on mount
+  useEffect(() => {
+    if (!tenderId) return
+    setTenderLoading(true)
+    setTenderError(null)
+    getTender(tenderId)
+      .then((resp) => { setTenderData(resp) })
+      .catch((err: unknown) => {
+        setTenderError(err instanceof Error ? err.message : 'Gagal memuat data tender')
+      })
+      .finally(() => { setTenderLoading(false) })
+  }, [tenderId])
+
   async function runXai(): Promise<void> {
-    const features = DEMO_FEATURES[tenderId] ?? {}
+    const features = tenderData?.features ?? {}
     setLoading(true)
     setError(null)
     try {
@@ -450,6 +472,7 @@ export function TenderDetail(): React.ReactElement {
 
   function renderTabContent(): React.ReactElement {
     if (!xaiData) return <></>
+    const features = tenderData?.features ?? {}
     const layerMap: Record<TabKey, XAILayer> = {
       shap:    xaiData.shap,
       anchors: xaiData.anchors,
@@ -461,13 +484,18 @@ export function TenderDetail(): React.ReactElement {
     switch (activeTab) {
       case 'shap':    return <ShapWaterfall layer={layer} />
       case 'anchors': return <AnchorsDisplay layer={layer} />
-      case 'dice':    return <DiceDisplay layer={layer} tenderId={tenderId} />
+      case 'dice':    return <DiceDisplay layer={layer} features={features} />
       case 'benford': return <BenfordDisplay layer={layer} />
       case 'leiden':  return <LeidenDisplay layer={layer} />
     }
   }
 
   const riskCls = report ? (RISK_BG[report.risk_level] ?? 'bg-gray-100 text-gray-700') : ''
+
+  // Risk badge from tender prediction
+  const predLevel = tenderData?.prediction?.risk_level
+  const predLabel = predLevel ? (RISK_LEVEL_LABEL[predLevel] ?? predLevel) : null
+  const predScore = tenderData?.prediction?.risk_score
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -481,11 +509,36 @@ export function TenderDetail(): React.ReactElement {
         </h1>
       </div>
 
+      {/* Tender metadata card */}
+      {tenderLoading && (
+        <div className="bg-slate-50 rounded-xl border border-gray-200 p-4 text-sm text-slate-500">
+          Memuat data tender...
+        </div>
+      )}
+      {tenderError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+          <strong>Error memuat tender:</strong> {tenderError}
+        </div>
+      )}
+      {tenderData && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-wrap gap-6 items-start">
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-semibold text-slate-800 truncate">{tenderData.title}</p>
+            <p className="text-sm text-slate-500 mt-1">{tenderData.buyer_name}</p>
+          </div>
+          {predLabel && (
+            <span className={`px-3 py-1 rounded-full text-sm font-bold flex-shrink-0 ${RISK_BG[predLabel] ?? 'bg-gray-100 text-gray-700'}`}>
+              {predLabel} {predScore !== undefined ? `(${Math.round(predScore * 100)}%)` : ''}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="flex gap-3 flex-wrap">
         <button
           onClick={() => { void runXai() }}
-          disabled={loading}
+          disabled={loading || tenderLoading}
           className="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg
                      hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center gap-2"
         >

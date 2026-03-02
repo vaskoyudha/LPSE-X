@@ -1,19 +1,7 @@
-import React, { useState } from 'react'
-import { generateReport, getReport } from '../api/client'
+import React, { useState, useEffect } from 'react'
+import { generateReport, getReport, listTenders } from '../api/client'
 import { RISK_BG } from '../types/models'
 import type { ReportResult } from '../types/models'
-
-// ============================================================================
-// Demo tender IDs to generate reports for
-// ============================================================================
-
-const DEMO_TENDER_IDS = [
-  'ID-2024-0001',
-  'ID-2024-0002',
-  'ID-2024-0003',
-  'ID-2024-0004',
-  'ID-2024-0005',
-]
 
 // ============================================================================
 // Risk score visual
@@ -30,6 +18,80 @@ function RiskScoreDots({ score, max = 3 }: { score: number; max?: number }): Rea
           }`}
         />
       ))}
+    </div>
+  )
+}
+
+// ============================================================================
+// High-risk tender buttons (fetched from real DB)
+// ============================================================================
+
+function HighRiskButtons({
+  onLoad,
+  loadingId,
+  loadedIds,
+}: {
+  onLoad: (tid: string) => void
+  loadingId: string | null
+  loadedIds: string[]
+}): React.ReactElement {
+  const [highRiskIds, setHighRiskIds] = useState<string[]>([])
+  const [fetching, setFetching] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetch(): Promise<void> {
+      try {
+        const res = await listTenders({ risk_level: 'high', page_size: 10 })
+        if (!cancelled) setHighRiskIds(res.items.map((t) => t.tender_id))
+      } catch {
+        // silently fail
+      } finally {
+        if (!cancelled) setFetching(false)
+      }
+    }
+    void fetch()
+    return () => { cancelled = true }
+  }, [])
+
+  if (fetching) {
+    return (
+      <div>
+        <p className="text-xs text-slate-500 mb-2 font-medium">Tender Risiko Tinggi:</p>
+        <div className="flex gap-2">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-7 w-36 bg-slate-100 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (highRiskIds.length === 0) return <></>
+
+  return (
+    <div>
+      <p className="text-xs text-slate-500 mb-2 font-medium">Tender Risiko Tinggi:</p>
+      <div className="flex flex-wrap gap-2">
+        {highRiskIds.map((tid) => {
+          const isLoaded = loadedIds.includes(tid)
+          const isLoading = loadingId === tid
+          return (
+            <button
+              key={tid}
+              onClick={() => onLoad(tid)}
+              disabled={isLoading}
+              className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-all ${
+                isLoaded
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
+                  : 'bg-white border-gray-300 text-slate-600 hover:bg-slate-50'
+              } disabled:opacity-60`}
+            >
+              {isLoading ? '⏳' : isLoaded ? '✓' : '📄'} {tid}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -263,30 +325,12 @@ export function Reports(): React.ReactElement {
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
         <h2 className="text-sm font-semibold text-slate-700">Generate Laporan</h2>
 
-        {/* Demo tender buttons */}
-        <div>
-          <p className="text-xs text-slate-500 mb-2 font-medium">Tender demo tersedia:</p>
-          <div className="flex flex-wrap gap-2">
-            {DEMO_TENDER_IDS.map((tid) => {
-              const isLoaded = reports.some((r) => r.tenderId === tid)
-              const isLoading = loadingId === tid
-              return (
-                <button
-                  key={tid}
-                  onClick={() => { void loadReport(tid) }}
-                  disabled={isLoading}
-                  className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-all ${
-                    isLoaded
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
-                      : 'bg-white border-gray-300 text-slate-600 hover:bg-slate-50'
-                  } disabled:opacity-60`}
-                >
-                  {isLoading ? '⏳' : isLoaded ? '✓' : '📄'} {tid}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        {/* High-risk tender buttons */}
+        <HighRiskButtons
+          onLoad={(tid) => { void loadReport(tid) }}
+          loadingId={loadingId}
+          loadedIds={reports.map((r) => r.tenderId)}
+        />
 
         {/* Custom tender ID input */}
         <div className="flex gap-2">
@@ -295,7 +339,7 @@ export function Reports(): React.ReactElement {
             value={customTenderId}
             onChange={(e) => setCustomTenderId(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { void handleCustomLoad() } }}
-            placeholder="Masukkan Tender ID custom (e.g. ID-2024-0123)"
+            placeholder="Masukkan Tender ID custom (e.g. SYN-2018-00627)"
             className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        placeholder:text-gray-400 font-mono"

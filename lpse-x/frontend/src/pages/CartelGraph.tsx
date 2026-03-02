@@ -4,47 +4,14 @@ import { ForceGraph2D } from 'react-force-graph'
 import { getGraphCommunities } from '../api/client'
 import type { GraphCommunity } from '../types/models'
 
-// ============================================================================
-// Demo graph data (used if backend returns empty)
-// ============================================================================
-
-const DEMO_COMMUNITIES: GraphCommunity[] = [
-  {
-    community_id: 1,
-    members: ['PT Makmur Jaya', 'CV Sentosa', 'PT Abadi'],
-    edge_weights: { 'PT Makmur Jaya|CV Sentosa': 0.9, 'CV Sentosa|PT Abadi': 0.75 },
-    tender_ids: ['ID-2024-0001', 'ID-2024-0003'],
-    risk_score: 0.88,
-  },
-  {
-    community_id: 2,
-    members: ['PT Nugraha', 'UD Pratama', 'CV Harapan', 'PT Utama'],
-    edge_weights: {
-      'PT Nugraha|UD Pratama': 0.95,
-      'UD Pratama|CV Harapan': 0.80,
-      'CV Harapan|PT Utama': 0.70,
-      'PT Nugraha|CV Harapan': 0.65,
-    },
-    tender_ids: ['ID-2024-0002'],
-    risk_score: 0.72,
-  },
-  {
-    community_id: 3,
-    members: ['PT Indah', 'CV Maju'],
-    edge_weights: { 'PT Indah|CV Maju': 0.60 },
-    tender_ids: ['ID-2024-0005'],
-    risk_score: 0.45,
-  },
-]
-
 const COMMUNITY_COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#06b6d4', '#22c55e']
 
 // Build force-graph data structure from communities
 function buildGraphData(communities: GraphCommunity[]): {
-  nodes: Array<{ id: string; communityId: number; color: string; size: number }>
+  nodes: Array<{ id: string; communityId: number | string; color: string; size: number }>
   links: Array<{ source: string; target: string; weight: number; color: string }>
 } {
-  const nodes: Array<{ id: string; communityId: number; color: string; size: number }> = []
+  const nodes: Array<{ id: string; communityId: number | string; color: string; size: number }> = []
   const links: Array<{ source: string; target: string; weight: number; color: string }> = []
   const nodeSet = new Set<string>()
 
@@ -56,10 +23,20 @@ function buildGraphData(communities: GraphCommunity[]): {
         nodes.push({ id: member, communityId: community.community_id, color, size: 6 })
       }
     }
-    for (const [edgeKey, weight] of Object.entries(community.edge_weights)) {
-      const parts = edgeKey.split('|')
-      if (parts.length === 2 && parts[0] && parts[1]) {
-        links.push({ source: parts[0], target: parts[1], weight, color })
+    if (community.edge_weights && Object.keys(community.edge_weights).length > 0) {
+      for (const [edgeKey, weight] of Object.entries(community.edge_weights)) {
+        const parts = edgeKey.split('|')
+        if (parts.length === 2 && parts[0] && parts[1]) {
+          links.push({ source: parts[0], target: parts[1], weight, color })
+        }
+      }
+    } else {
+      // Synthetic edges from member pairs when no edge_weights provided
+      const w = community.members.length > 1 ? 1.0 / community.members.length : 1.0
+      for (let i = 0; i < community.members.length; i++) {
+        for (let j = i + 1; j < community.members.length; j++) {
+          links.push({ source: community.members[i], target: community.members[j], weight: w, color })
+        }
       }
     }
   }
@@ -100,11 +77,7 @@ export function CartelGraph(): React.ReactElement {
     retry: 1,
   })
 
-  // Use real data or demo fallback
-  const communities: GraphCommunity[] =
-    graphQuery.isSuccess && graphQuery.data.communities.length > 0
-      ? graphQuery.data.communities
-      : DEMO_COMMUNITIES
+  const communities: GraphCommunity[] = graphQuery.data?.communities ?? []
 
   const graphData = buildGraphData(communities)
 
@@ -118,8 +91,6 @@ export function CartelGraph(): React.ReactElement {
     },
     [communities],
   )
-
-  const useDemoNotice = graphQuery.isSuccess && graphQuery.data.communities.length === 0
 
   return (
     <div className="space-y-4">
@@ -135,12 +106,10 @@ export function CartelGraph(): React.ReactElement {
             <span className="text-sm text-slate-400 animate-pulse">Memuat data...</span>
           )}
           {graphQuery.isError && (
-            <span className="text-sm text-red-500">Backend offline — menggunakan data demo</span>
+            <span className="text-sm text-red-500">Gagal memuat data jaringan</span>
           )}
-          {useDemoNotice && (
-            <span className="text-sm text-amber-600">
-              ⚠ Jalankan graph builder untuk data nyata
-            </span>
+          {graphQuery.isSuccess && communities.length === 0 && (
+            <span className="text-sm text-slate-400">Belum ada komunitas terdeteksi</span>
           )}
         </div>
       </div>
@@ -155,8 +124,8 @@ export function CartelGraph(): React.ReactElement {
             nodeColor={(n) => (n as { color: string }).color}
             nodeVal={(n) => (n as { size: number }).size}
             nodeLabel={(n) => {
-              const node = n as { id: string; communityId: number }
-              return `${node.id} (Komunitas #${node.communityId})`
+              const node = n as { id: string; communityId: number | string }
+              return `${node.id} (Komunitas #${String(node.communityId)})`
             }}
             linkColor={(l) => (l as { color: string }).color}
             linkWidth={(l) => Math.max(1, ((l as { weight?: number }).weight ?? 0.5) * 4)}
@@ -194,7 +163,7 @@ export function CartelGraph(): React.ReactElement {
                 const isSelected = selectedCommunity?.community_id === c.community_id
                 return (
                   <button
-                    key={c.community_id}
+                    key={String(c.community_id)}
                     onClick={() => setSelectedCommunity(isSelected ? null : c)}
                     className={`w-full text-left px-4 py-3 transition-colors hover:bg-slate-50 ${
                       isSelected ? 'bg-blue-50 border-l-2 border-blue-500' : ''
@@ -206,7 +175,7 @@ export function CartelGraph(): React.ReactElement {
                         style={{ backgroundColor: color }}
                       />
                       <span className="text-sm font-medium text-slate-700">
-                        Komunitas #{c.community_id}
+                        Komunitas #{String(c.community_id)}
                       </span>
                       <span className="text-xs text-slate-400">
                         {c.members.length} vendor
@@ -225,7 +194,7 @@ export function CartelGraph(): React.ReactElement {
           {selectedCommunity && (
             <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
               <h3 className="text-sm font-semibold text-slate-700">
-                Detail Komunitas #{selectedCommunity.community_id}
+                Detail Komunitas #{String(selectedCommunity.community_id)}
               </h3>
               <div>
                 <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">
@@ -246,13 +215,13 @@ export function CartelGraph(): React.ReactElement {
                   ))}
                 </ul>
               </div>
-              {selectedCommunity.tender_ids.length > 0 && (
+              {(selectedCommunity.tender_ids?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">
                     Tender Terkait:
                   </p>
                   <ul className="space-y-1">
-                    {selectedCommunity.tender_ids.map((tid) => (
+                    {selectedCommunity.tender_ids?.map((tid) => (
                       <li key={tid} className="text-xs text-blue-600 font-mono">
                         {tid}
                       </li>

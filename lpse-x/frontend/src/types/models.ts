@@ -123,14 +123,56 @@ export interface DiceStatusResponse {
 }
 
 /**
+ * Tender from GET /api/tenders (with optional prediction)
+ */
+export interface TenderWithRisk {
+  tender_id: string;
+  title: string;
+  buyer_name: string;
+  buyer_id?: string;
+  value_amount?: number;
+  value_currency?: string;
+  procurement_method?: string;
+  procurement_category?: string;
+  status?: string;
+  date_published?: string;
+  date_awarded?: string;
+  npwp_hash?: string;
+  npwp_last4?: string;
+  total_score?: number;
+  year?: number;
+  source?: string;
+  prediction?: {
+    risk_score: number;
+    risk_level: string;
+    model_version: string;
+    predicted_at: string;
+  } | null;
+}
+
+export interface TenderListResponse {
+  items: TenderWithRisk[];
+  total: number;
+  page: number;
+  page_size: number;
+  timestamp: string;
+}
+
+export interface TenderDetailResponse extends TenderWithRisk {
+  features: Record<string, number>;
+  timestamp: string;
+}
+
+/**
  * Graph community from GET /api/graph
  */
 export interface GraphCommunity {
-  community_id: number;
+  community_id: number | string;
   members: string[];
-  edge_weights: Record<string, number>;
-  tender_ids: string[];
+  edge_weights?: Record<string, number>;
+  tender_ids?: string[];
   risk_score?: number;
+  size?: number;
   leiden_modularity?: number;
   detected_at?: string;
 }
