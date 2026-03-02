@@ -53,10 +53,10 @@ function RiskScoreBar({ score }: { score: number }): React.ReactElement {
   const color = score >= 0.7 ? 'bg-red-500' : score >= 0.4 ? 'bg-amber-400' : 'bg-green-500'
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+      <div className="flex-1 bg-slate-700 rounded-full h-2 overflow-hidden">
         <div className={`h-2 rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs font-medium text-slate-600 w-8 text-right">{pct}%</span>
+      <span className="text-xs font-medium text-slate-400 w-8 text-right">{pct}%</span>
     </div>
   )
 }
@@ -96,27 +96,27 @@ export function CartelGraph(): React.ReactElement {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Jaringan Kartel Vendor</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">Jaringan Kartel Vendor</h1>
+          <p className="text-sm text-slate-400 mt-1">
             Deteksi komunitas bid-rigging menggunakan algoritma Leiden
           </p>
         </div>
         <div className="flex items-center gap-3">
           {graphQuery.isLoading && (
-            <span className="text-sm text-slate-400 animate-pulse">Memuat data...</span>
+            <span className="text-sm text-slate-500 animate-pulse">Memuat data...</span>
           )}
           {graphQuery.isError && (
-            <span className="text-sm text-red-500">Gagal memuat data jaringan</span>
+            <span className="text-sm text-red-400">Gagal memuat data jaringan</span>
           )}
           {graphQuery.isSuccess && communities.length === 0 && (
-            <span className="text-sm text-slate-400">Belum ada komunitas terdeteksi</span>
+            <span className="text-sm text-slate-500">Belum ada komunitas terdeteksi</span>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {/* Graph canvas */}
-        <div className="xl:col-span-3 bg-slate-900 rounded-xl overflow-hidden border border-slate-700 shadow-lg" style={{ height: 480 }}>
+        <div className="xl:col-span-3 bg-slate-900 rounded-card overflow-hidden ring-1 ring-slate-700 shadow-card" style={{ height: 480 }}>
           <ForceGraph2D
             ref={graphRef}
             graphData={graphData}
@@ -151,13 +151,13 @@ export function CartelGraph(): React.ReactElement {
 
         {/* Community list + selected detail */}
         <div className="xl:col-span-1 space-y-3 overflow-y-auto" style={{ maxHeight: 480 }}>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-200 bg-slate-50">
-              <h3 className="text-sm font-semibold text-slate-700">
+          <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-700 bg-slate-900/50">
+              <h3 className="text-sm font-semibold text-slate-300">
                 {communities.length} Komunitas Terdeteksi
               </h3>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-700/50">
               {communities.map((c, ci) => {
                 const color = COMMUNITY_COLORS[ci % COMMUNITY_COLORS.length]
                 const isSelected = selectedCommunity?.community_id === c.community_id
@@ -165,8 +165,8 @@ export function CartelGraph(): React.ReactElement {
                   <button
                     key={String(c.community_id)}
                     onClick={() => setSelectedCommunity(isSelected ? null : c)}
-                    className={`w-full text-left px-4 py-3 transition-colors hover:bg-slate-50 ${
-                      isSelected ? 'bg-blue-50 border-l-2 border-blue-500' : ''
+                    className={`w-full text-left px-4 py-3 motion-safe:transition-colors hover:bg-slate-700/50 ${
+                      isSelected ? 'bg-indigo-900/30 border-l-2 border-indigo-400' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
@@ -174,10 +174,10 @@ export function CartelGraph(): React.ReactElement {
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: color }}
                       />
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-slate-300">
                         Komunitas #{String(c.community_id)}
                       </span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-500">
                         {c.members.length} vendor
                       </span>
                     </div>
@@ -192,8 +192,8 @@ export function CartelGraph(): React.ReactElement {
 
           {/* Selected community detail */}
           {selectedCommunity && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-slate-700">
+            <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-slate-300">
                 Detail Komunitas #{String(selectedCommunity.community_id)}
               </h3>
               <div>
@@ -206,8 +206,8 @@ export function CartelGraph(): React.ReactElement {
                       key={m}
                       className={`text-xs px-2 py-1 rounded ${
                         selectedNode === m
-                          ? 'bg-blue-100 text-blue-700 font-medium'
-                          : 'bg-slate-50 text-slate-600'
+                          ? 'bg-indigo-900/50 text-indigo-300 font-medium'
+                          : 'bg-slate-700/50 text-slate-400'
                       }`}
                     >
                       {m}
@@ -222,7 +222,7 @@ export function CartelGraph(): React.ReactElement {
                   </p>
                   <ul className="space-y-1">
                     {selectedCommunity.tender_ids?.map((tid) => (
-                      <li key={tid} className="text-xs text-blue-600 font-mono">
+                      <li key={tid} className="text-xs text-indigo-400 font-mono">
                         {tid}
                       </li>
                     ))}
@@ -235,9 +235,9 @@ export function CartelGraph(): React.ReactElement {
       </div>
 
       {/* Legend */}
-      <div className="bg-slate-800 rounded-xl p-4 text-white">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Legenda</p>
-        <div className="flex flex-wrap gap-4 text-xs">
+      <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Legenda</p>
+        <div className="flex flex-wrap gap-4 text-xs text-slate-400">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-red-500" />
             <span>Risiko Tinggi (&gt;70%)</span>
@@ -251,7 +251,7 @@ export function CartelGraph(): React.ReactElement {
             <span>Risiko Rendah (&lt;40%)</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-6 h-1 bg-slate-400" style={{ height: 2 }} />
+            <div className="h-px w-6 bg-slate-500" />
             <span>Hubungan penawaran bersama (co-bidding)</span>
           </div>
         </div>

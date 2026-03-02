@@ -2,8 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Plot from 'react-plotly.js'
 import { getTender, getXaiExplanation, precomputeDice, getDiceStatus, generateReport } from '../api/client'
-import { RISK_BG } from '../types/models'
 import type { OracleSandwichResult, XAILayer, ReportResult, TenderDetailResponse } from '../types/models'
+
+const DARK_RISK_BG: Record<string, string> = {
+  'Aman':           'bg-green-900/40 text-green-300 ring-1 ring-green-700/50',
+  'Perlu Pantauan': 'bg-amber-900/40 text-amber-300 ring-1 ring-amber-700/50',
+  'Risiko Tinggi':  'bg-red-900/40 text-red-300 ring-1 ring-red-700/50',
+  'Risiko Kritis':  'bg-red-950 text-red-200 ring-1 ring-red-800',
+}
 
 // ============================================================================
 // Sub-components
@@ -11,12 +17,12 @@ import type { OracleSandwichResult, XAILayer, ReportResult, TenderDetailResponse
 
 function LayerStatusBadge({ layer }: { layer: XAILayer }): React.ReactElement {
   if (layer.status === 'ok') {
-    return <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">✓ OK</span>
+    return <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-900/40 text-green-300 ring-1 ring-green-700/50">✓ OK</span>
   }
   if (layer.status === 'not_applicable') {
-    return <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">N/A</span>
+    return <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-slate-700/60 text-slate-400 ring-1 ring-slate-600">N/A</span>
   }
-  return <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">✗ Error</span>
+  return <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-900/40 text-red-300 ring-1 ring-red-700/50">✗ Error</span>
 }
 
 // ---- SHAP Waterfall ----
@@ -61,14 +67,14 @@ function ShapWaterfall({ layer }: { layer: XAILayer }): React.ReactElement {
       layout={{
         height: Math.max(280, entries.length * 28),
         margin: { l: 140, r: 20, t: 30, b: 40 },
-        xaxis: { title: 'Kontribusi SHAP', zeroline: true, zerolinecolor: '#94a3b8' },
-        yaxis: { automargin: true },
+        xaxis: { title: 'Kontribusi SHAP', zeroline: true, zerolinecolor: '#334155', color: '#64748b', gridcolor: '#1e293b' },
+        yaxis: { automargin: true, color: '#94a3b8', gridcolor: '#1e293b' },
         shapes: [
           {
             type: 'line',
             x0: 0, x1: 0,
             y0: -0.5, y1: entries.length - 0.5,
-            line: { color: '#64748b', width: 1.5, dash: 'dot' },
+            line: { color: '#475569', width: 1.5, dash: 'dot' },
           },
         ],
         annotations: [
@@ -81,9 +87,9 @@ function ShapWaterfall({ layer }: { layer: XAILayer }): React.ReactElement {
             font: { size: 11, color: '#64748b' },
           },
         ],
-        plot_bgcolor: '#f8fafc',
-        paper_bgcolor: '#ffffff',
-        font: { family: 'Inter, system-ui, sans-serif', size: 12 },
+        plot_bgcolor: '#0f172a',
+        paper_bgcolor: '#1e293b',
+        font: { family: 'Inter, system-ui, sans-serif', size: 12, color: '#94a3b8' },
       }}
       config={{ responsive: true, displayModeBar: false }}
       style={{ width: '100%' }}
@@ -113,12 +119,12 @@ function AnchorsDisplay({ layer }: { layer: XAILayer }): React.ReactElement {
         <div className="flex gap-4 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-slate-500">Presisi:</span>
-            <span className="font-semibold text-slate-700">{(precision * 100).toFixed(1)}%</span>
+            <span className="font-semibold text-slate-300">{(precision * 100).toFixed(1)}%</span>
           </div>
           {coverage !== null && (
             <div className="flex items-center gap-2">
               <span className="text-slate-500">Cakupan:</span>
-              <span className="font-semibold text-slate-700">{(coverage * 100).toFixed(1)}%</span>
+              <span className="font-semibold text-slate-300">{(coverage * 100).toFixed(1)}%</span>
             </div>
           )}
         </div>
@@ -129,10 +135,10 @@ function AnchorsDisplay({ layer }: { layer: XAILayer }): React.ReactElement {
           {rules.map((rule, i) => (
             <div
               key={i}
-              className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+              className="flex items-start gap-2 bg-indigo-950/50 border border-indigo-800 rounded-lg px-3 py-2"
             >
-              <span className="text-amber-600 font-bold text-sm mt-0.5">IF</span>
-              <code className="text-sm text-slate-700 font-mono">{rule}</code>
+              <span className="text-indigo-400 font-bold text-sm mt-0.5">IF</span>
+              <code className="text-slate-300 text-sm font-mono">{rule}</code>
             </div>
           ))}
         </div>
@@ -183,16 +189,16 @@ function DiceDisplay({ layer, features }: { layer: XAILayer; features: Record<st
     if (cfs.length > 0) {
       const allKeys = [...new Set(cfs.flatMap((cf) => Object.keys(cf)))]
       return (
-        <div className="overflow-x-auto">
-          <p className="text-xs text-slate-500 mb-2">
+        <div className="overflow-x-auto bg-slate-800 rounded-xl">
+          <p className="text-xs text-slate-400 mb-2 p-4 pb-0">
             {cfs.length} skenario kontrafaktual — perubahan minimal untuk mengurangi risiko:
           </p>
           <table className="text-xs w-full border-collapse">
-            <thead>
-              <tr className="bg-slate-50">
-                <th className="px-3 py-2 text-left text-slate-500 border border-gray-200">#</th>
+            <thead className="bg-slate-700/60 text-slate-400">
+              <tr>
+                <th className="px-3 py-2 text-left border border-slate-700/50">#</th>
                 {allKeys.map((k) => (
-                  <th key={k} className="px-3 py-2 text-left text-slate-500 border border-gray-200">
+                  <th key={k} className="px-3 py-2 text-left border border-slate-700/50">
                     {k}
                   </th>
                 ))}
@@ -200,10 +206,10 @@ function DiceDisplay({ layer, features }: { layer: XAILayer; features: Record<st
             </thead>
             <tbody>
               {cfs.map((cf, i) => (
-                <tr key={i} className="hover:bg-blue-50 transition-colors">
-                  <td className="px-3 py-2 font-bold text-blue-600 border border-gray-200">{i + 1}</td>
+                <tr key={i} className="hover:bg-slate-700/40 motion-safe:transition-colors">
+                  <td className="px-3 py-2 font-bold text-slate-300 border border-slate-700/50">{i + 1}</td>
                   {allKeys.map((k) => (
-                    <td key={k} className="px-3 py-2 text-slate-700 border border-gray-200 font-mono">
+                    <td key={k} className="px-3 py-2 text-slate-300 border border-slate-700/50 font-mono">
                       {typeof cf[k] === 'number' ? (cf[k] as number).toFixed(3) : String(cf[k] ?? '—')}
                     </td>
                   ))}
@@ -230,22 +236,20 @@ function DiceDisplay({ layer, features }: { layer: XAILayer; features: Record<st
             placeholder="Tender ID"
             value={tenderId}
             onChange={(e) => setTenderId(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg font-mono w-48
-                       focus:outline-none focus:ring-2 focus:ring-purple-400"
+            className="bg-slate-700 border-slate-600 text-slate-200 placeholder:text-slate-500 rounded-lg px-3 py-1.5 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none w-48"
           />
           <div>
             <button
               onClick={() => { void triggerDice(tenderId) }}
               disabled={loading || !tenderId.trim()}
-              className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg
-                         hover:bg-purple-700 disabled:opacity-60 transition-colors"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg disabled:opacity-60 motion-safe:transition-colors"
             >
               {loading ? '⏳ Memulai...' : '🎲 Hitung Kontrafaktual DiCE'}
             </button>
           </div>
         </div>
       ) : (
-        <p className="text-sm text-purple-600 font-medium">{statusMsg}</p>
+        <p className="text-sm text-indigo-400 font-medium">{statusMsg}</p>
       )}
     </div>
   )
@@ -281,14 +285,14 @@ function BenfordDisplay({ layer }: { layer: XAILayer }): React.ReactElement {
         <div
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold ${
             suspicious
-              ? 'bg-red-100 text-red-700 border border-red-300'
-              : 'bg-green-100 text-green-700 border border-green-300'
+              ? 'bg-red-900/50 text-red-300 border border-red-700'
+              : 'bg-green-900/50 text-green-300 border border-green-700'
           }`}
         >
           {suspicious ? '⚠ Distribusi Mencurigakan' : '✓ Distribusi Normal'}
         </div>
         {chi2 !== null && (
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-slate-400">
             χ² = <span className="font-mono font-medium">{chi2.toFixed(3)}</span>
             {pValue !== null && (
               <span className="ml-2">
@@ -321,12 +325,12 @@ function BenfordDisplay({ layer }: { layer: XAILayer }): React.ReactElement {
           layout={{
             height: 240,
             margin: { l: 40, r: 20, t: 20, b: 40 },
-            xaxis: { title: 'Digit Pertama' },
-            yaxis: { title: 'Frekuensi Relatif' },
-            legend: { orientation: 'h', y: -0.25 },
-            plot_bgcolor: '#f8fafc',
-            paper_bgcolor: '#ffffff',
-            font: { family: 'Inter, system-ui, sans-serif', size: 11 },
+            xaxis: { title: 'Digit Pertama', color: '#64748b', gridcolor: '#1e293b' },
+            yaxis: { title: 'Frekuensi Relatif', color: '#64748b', gridcolor: '#1e293b' },
+            legend: { orientation: 'h', y: -0.25, font: { color: '#94a3b8' } },
+            plot_bgcolor: '#0f172a',
+            paper_bgcolor: '#1e293b',
+            font: { family: 'Inter, system-ui, sans-serif', size: 11, color: '#94a3b8' },
           }}
           config={{ responsive: true, displayModeBar: false }}
           style={{ width: '100%' }}
@@ -358,27 +362,27 @@ function LeidenDisplay({ layer }: { layer: XAILayer }): React.ReactElement {
     <div className="space-y-3">
       <div className="grid grid-cols-3 gap-3">
         {communityId !== undefined && (
-          <div className="bg-slate-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-slate-500 mb-1">Komunitas ID</p>
-            <p className="text-xl font-bold text-slate-700">#{String(communityId)}</p>
+          <div className="bg-slate-700/50 ring-1 ring-slate-600 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-400 mb-1">Komunitas ID</p>
+            <p className="text-xl font-bold text-white">#{String(communityId)}</p>
           </div>
         )}
         {size !== undefined && (
-          <div className="bg-slate-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-slate-500 mb-1">Ukuran Komunitas</p>
-            <p className="text-xl font-bold text-slate-700">{String(size)} vendor</p>
+          <div className="bg-slate-700/50 ring-1 ring-slate-600 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-400 mb-1">Ukuran Komunitas</p>
+            <p className="text-xl font-bold text-white">{String(size)} vendor</p>
           </div>
         )}
         {riskScore !== null && (
-          <div className="bg-red-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-slate-500 mb-1">Skor Risiko Kartel</p>
-            <p className="text-xl font-bold text-red-600">{(riskScore * 100).toFixed(1)}%</p>
+          <div className="bg-red-900/30 ring-1 ring-red-800 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-400 mb-1">Skor Risiko Kartel</p>
+            <p className="text-xl font-bold text-white">{(riskScore * 100).toFixed(1)}%</p>
           </div>
         )}
       </div>
       <Link
         to="/cartel"
-        className="block text-center text-sm text-blue-600 hover:text-blue-800 underline underline-offset-2 transition-colors"
+        className="block text-center text-sm text-indigo-400 hover:text-indigo-300 motion-safe:transition-colors underline underline-offset-2"
       >
         Lihat Grafik Jaringan Kartel →
       </Link>
@@ -490,7 +494,7 @@ export function TenderDetail(): React.ReactElement {
     }
   }
 
-  const riskCls = report ? (RISK_BG[report.risk_level] ?? 'bg-gray-100 text-gray-700') : ''
+  const riskCls = report ? (DARK_RISK_BG[report.risk_level] ?? 'bg-slate-700/60 text-slate-400 ring-1 ring-slate-600') : ''
 
   // Risk badge from tender prediction
   const predLevel = tenderData?.prediction?.risk_level
@@ -501,33 +505,33 @@ export function TenderDetail(): React.ReactElement {
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link to="/" className="text-slate-400 hover:text-slate-600 transition-colors text-sm">
+        <Link to="/" className="text-slate-500 hover:text-slate-300 motion-safe:transition-colors text-sm">
           ← Kembali
         </Link>
-        <h1 className="text-2xl font-bold text-slate-800">
+        <h1 className="text-2xl font-bold text-white">
           Analisis XAI — {tenderId}
         </h1>
       </div>
 
       {/* Tender metadata card */}
       {tenderLoading && (
-        <div className="bg-slate-50 rounded-xl border border-gray-200 p-4 text-sm text-slate-500">
+        <div className="bg-slate-800/40 ring-1 ring-slate-700/50 rounded-xl p-4 text-sm text-slate-400">
           Memuat data tender...
         </div>
       )}
       {tenderError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+        <div className="bg-red-950/50 border border-red-800 rounded-xl p-4 text-red-300 text-sm">
           <strong>Error memuat tender:</strong> {tenderError}
         </div>
       )}
       {tenderData && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-wrap gap-6 items-start">
+        <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-5 flex flex-wrap gap-6 items-start shadow-card">
           <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold text-slate-800 truncate">{tenderData.title}</p>
-            <p className="text-sm text-slate-500 mt-1">{tenderData.buyer_name}</p>
+            <p className="text-base font-semibold text-slate-200 truncate">{tenderData.title}</p>
+            <p className="text-sm text-slate-400 mt-1">{tenderData.buyer_name}</p>
           </div>
           {predLabel && (
-            <span className={`px-3 py-1 rounded-full text-sm font-bold flex-shrink-0 ${RISK_BG[predLabel] ?? 'bg-gray-100 text-gray-700'}`}>
+            <span className={`px-3 py-1 rounded-full text-sm font-bold flex-shrink-0 ${DARK_RISK_BG[predLabel] ?? 'bg-slate-700/60 text-slate-400 ring-1 ring-slate-600'}`}>
               {predLabel} {predScore !== undefined ? `(${Math.round(predScore * 100)}%)` : ''}
             </span>
           )}
@@ -539,8 +543,7 @@ export function TenderDetail(): React.ReactElement {
         <button
           onClick={() => { void runXai() }}
           disabled={loading || tenderLoading}
-          className="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg
-                     hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg disabled:opacity-60 motion-safe:transition-colors flex items-center gap-2"
         >
           {loading ? (
             <>
@@ -558,8 +561,7 @@ export function TenderDetail(): React.ReactElement {
           <button
             onClick={() => { void runReport() }}
             disabled={reportLoading}
-            className="px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg
-                       hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+            className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg disabled:opacity-60 motion-safe:transition-colors"
           >
             {reportLoading ? '⏳ Membuat laporan...' : '📋 Buat Laporan IIA 2025'}
           </button>
@@ -568,18 +570,18 @@ export function TenderDetail(): React.ReactElement {
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+        <div className="bg-red-950/50 border border-red-800 rounded-xl p-4 text-red-300 text-sm">
           <strong>Error:</strong> {error}
         </div>
       )}
 
       {/* Oracle Sandwich result */}
       {xaiData && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card shadow-card overflow-hidden">
           {/* Summary bar */}
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-slate-50">
+          <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-900/50">
             <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold text-slate-700">Oracle Sandwich — 5 Lapisan XAI</h2>
+              <h2 className="text-base font-semibold text-slate-200">Oracle Sandwich — 5 Lapisan XAI</h2>
               <span className="text-sm text-slate-500">
                 {xaiData.layers_ok}/{xaiData.layers_ok + xaiData.layers_failed} lapisan berhasil
                 &nbsp;•&nbsp;{xaiData.total_seconds.toFixed(2)}s
@@ -598,15 +600,15 @@ export function TenderDetail(): React.ReactElement {
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200 flex">
+          <div className="border-b border-slate-700 flex">
             {TABS.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setActiveTab(t.key)}
-                className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-5 py-3 text-sm font-medium border-b-2 motion-safe:transition-colors ${
                   activeTab === t.key
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                    ? 'border-indigo-400 text-indigo-300'
+                    : 'border-transparent text-slate-500 hover:text-slate-300 hover:border-slate-600'
                 }`}
               >
                 {t.emoji} {t.label}
@@ -623,17 +625,16 @@ export function TenderDetail(): React.ReactElement {
 
       {/* Report */}
       {report && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-700">Laporan Pra-Investigasi</h2>
+        <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-700 bg-slate-900/50 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-slate-200">Laporan Pra-Investigasi</h2>
             <div className="flex items-center gap-3">
               <span className={`px-3 py-1 rounded-full text-sm font-semibold ${riskCls}`}>
                 {report.risk_level}
               </span>
               <button
                 onClick={() => window.print()}
-                className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-slate-700
-                           rounded-lg transition-colors font-medium"
+                className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg motion-safe:transition-colors"
               >
                 🖨 Cetak / PDF
               </button>
@@ -641,18 +642,18 @@ export function TenderDetail(): React.ReactElement {
           </div>
           <div className="p-6 space-y-4">
             {/* Score + evidence */}
-            <div className="flex items-center gap-6 text-sm text-slate-600">
+            <div className="flex items-center gap-6 text-sm text-slate-400">
               <span>Skor Risiko: <strong>{report.risk_score}/3</strong></span>
               <span>Bukti: <strong>{report.evidence_count}</strong></span>
               <span>Dibuat: <strong>{new Date(report.generated_at).toLocaleString('id-ID')}</strong></span>
             </div>
             {/* Recommendations */}
             {report.recommendations.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <p className="text-sm font-semibold text-amber-800 mb-2">Rekomendasi:</p>
+              <div className="bg-amber-950/40 border border-amber-800 rounded-lg p-4">
+                <p className="text-sm font-semibold text-amber-200/90 mb-2">Rekomendasi:</p>
                 <ul className="space-y-1">
                   {report.recommendations.map((rec, i) => (
-                    <li key={i} className="text-sm text-amber-900 flex gap-2">
+                    <li key={i} className="text-sm text-amber-200/90 flex gap-2">
                       <span className="text-amber-600 font-bold">{i + 1}.</span>
                       {rec}
                     </li>
@@ -661,8 +662,8 @@ export function TenderDetail(): React.ReactElement {
               </div>
             )}
             {/* Full report text */}
-            <div className="bg-slate-50 rounded-lg p-5">
-              <pre className="text-xs text-slate-700 whitespace-pre-wrap font-mono leading-relaxed">
+            <div className="bg-slate-900 ring-1 ring-slate-700 rounded-xl p-5">
+              <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed">
                 {report.report_text}
               </pre>
             </div>
@@ -672,10 +673,10 @@ export function TenderDetail(): React.ReactElement {
 
       {/* Placeholder before running XAI */}
       {!xaiData && !loading && (
-        <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-10 text-center">
+        <div className="bg-slate-800/50 ring-1 ring-slate-700/50 border-2 border-dashed border-slate-700 rounded-card p-10 text-center">
           <p className="text-4xl mb-3">🔮</p>
-          <p className="text-slate-600 font-medium">Oracle Sandwich siap dijalankan</p>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-slate-400 font-medium">Oracle Sandwich siap dijalankan</p>
+          <p className="text-slate-500 text-sm mt-1">
             Klik tombol "Jalankan Oracle Sandwich XAI" untuk melihat penjelasan 5-lapisan
           </p>
         </div>

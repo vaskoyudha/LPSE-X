@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { generateReport, getReport, listTenders } from '../api/client'
-import { RISK_BG } from '../types/models'
 import type { ReportResult } from '../types/models'
+
+const DARK_RISK_BG: Record<string, string> = {
+  'Aman':           'bg-green-900/40 text-green-300',
+  'Perlu Pantauan': 'bg-amber-900/40 text-amber-300',
+  'Risiko Tinggi':  'bg-red-900/40 text-red-300',
+  'Risiko Kritis':  'bg-red-950 text-red-200',
+}
 
 // ============================================================================
 // Risk score visual
@@ -14,7 +20,7 @@ function RiskScoreDots({ score, max = 3 }: { score: number; max?: number }): Rea
         <span
           key={i}
           className={`w-3 h-3 rounded-full ${
-            i < score ? 'bg-red-500' : 'bg-gray-200'
+            i < score ? 'bg-red-400' : 'bg-slate-600'
           }`}
         />
       ))}
@@ -60,7 +66,7 @@ function HighRiskButtons({
         <p className="text-xs text-slate-500 mb-2 font-medium">Tender Risiko Tinggi:</p>
         <div className="flex gap-2">
           {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="h-7 w-36 bg-slate-100 rounded-lg animate-pulse" />
+            <div key={i} className="h-7 w-36 bg-slate-700 rounded-lg motion-safe:animate-pulse" />
           ))}
         </div>
       </div>
@@ -81,10 +87,10 @@ function HighRiskButtons({
               key={tid}
               onClick={() => onLoad(tid)}
               disabled={isLoading}
-              className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-all ${
+              className={`px-3 py-1.5 text-xs font-mono rounded-lg border motion-safe:transition-all ${
                 isLoaded
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
-                  : 'bg-white border-gray-300 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-emerald-900/40 border-emerald-700 text-emerald-300 hover:bg-emerald-900/60'
+                  : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
               } disabled:opacity-60`}
             >
               {isLoading ? '⏳' : isLoaded ? '✓' : '📄'} {tid}
@@ -111,20 +117,20 @@ function ReportCard({
   onSelect: () => void
   isSelected: boolean
 }): React.ReactElement {
-  const bgClass = RISK_BG[report.risk_level] ?? 'bg-gray-100 text-gray-700'
+  const bgClass = DARK_RISK_BG[report.risk_level] ?? 'bg-slate-700 text-slate-300'
   return (
     <button
       onClick={onSelect}
-      className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+      className={`w-full text-left px-4 py-3 rounded-card border motion-safe:transition-all ${
         isSelected
-          ? 'border-blue-400 bg-blue-50 shadow-sm'
-          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-slate-50'
+          ? 'border-indigo-500/50 bg-indigo-900/20 shadow-glow-blue'
+          : 'border-slate-700 bg-slate-800 hover:border-slate-600 hover:bg-slate-700/60'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-700 font-mono">{tenderId}</p>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-sm font-semibold text-slate-200 font-mono">{tenderId}</p>
+          <p className="text-xs text-slate-500 mt-0.5">
             {new Date(report.generated_at).toLocaleString('id-ID')}
           </p>
         </div>
@@ -149,17 +155,17 @@ function ReportCard({
 // ============================================================================
 
 function ReportViewer({ report }: { report: ReportResult }): React.ReactElement {
-  const bgClass = RISK_BG[report.risk_level] ?? 'bg-gray-100 text-gray-700'
+  const bgClass = DARK_RISK_BG[report.risk_level] ?? 'bg-slate-700 text-slate-300'
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card overflow-hidden">
       {/* Header bar */}
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-slate-50 print:bg-white">
+      <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-900/50">
         <div>
-          <h2 className="text-base font-bold text-slate-700">
+          <h2 className="text-base font-bold text-slate-200">
             Laporan Pra-Investigasi — {report.tender_id}
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             Dibuat: {new Date(report.generated_at).toLocaleString('id-ID')} &nbsp;|&nbsp;
             Hash: {report.tender_id.replace(/[^A-Z0-9]/g, '').toLowerCase()}
           </p>
@@ -170,8 +176,7 @@ function ReportViewer({ report }: { report: ReportResult }): React.ReactElement 
           </span>
           <button
             onClick={() => window.print()}
-            className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-slate-700
-                       rounded-lg transition-colors font-medium flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg motion-safe:transition-colors flex items-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -185,33 +190,33 @@ function ReportViewer({ report }: { report: ReportResult }): React.ReactElement 
       <div className="p-6 space-y-5">
         {/* Metadata grid */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-slate-50 rounded-lg p-3">
+          <div className="bg-slate-700/50 ring-1 ring-slate-600 rounded-lg p-3">
             <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Skor Risiko</p>
             <div className="flex items-center gap-2">
               <RiskScoreDots score={report.risk_score} />
-              <span className="text-sm font-bold text-slate-700">{report.risk_score}/3</span>
+              <span className="text-xl font-bold text-white">{report.risk_score}/3</span>
             </div>
           </div>
-          <div className="bg-slate-50 rounded-lg p-3">
+          <div className="bg-slate-700/50 ring-1 ring-slate-600 rounded-lg p-3">
             <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Jumlah Bukti</p>
-            <p className="text-xl font-bold text-slate-700">{report.evidence_count}</p>
+            <p className="text-xl font-bold text-white">{report.evidence_count}</p>
           </div>
-          <div className="bg-slate-50 rounded-lg p-3">
+          <div className="bg-slate-700/50 ring-1 ring-slate-600 rounded-lg p-3">
             <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Rekomendasi</p>
-            <p className="text-xl font-bold text-slate-700">{report.recommendations.length}</p>
+            <p className="text-xl font-bold text-white">{report.recommendations.length}</p>
           </div>
         </div>
 
         {/* Recommendations */}
         {report.recommendations.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <p className="text-sm font-bold text-amber-800 mb-3">
+          <div className="bg-amber-950/40 border border-amber-800 rounded-xl p-4">
+            <p className="text-sm font-bold text-amber-400 mb-3">
               ⚠ Rekomendasi Tindak Lanjut
             </p>
             <ol className="space-y-2">
               {report.recommendations.map((rec, i) => (
-                <li key={i} className="flex gap-3 text-sm text-amber-900">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-200 text-amber-800
+                <li key={i} className="flex gap-3 text-sm text-amber-200/80">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-900/50 text-amber-400
                                    flex items-center justify-center text-xs font-bold">
                     {i + 1}
                   </span>
@@ -230,7 +235,7 @@ function ReportViewer({ report }: { report: ReportResult }): React.ReactElement 
                 <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
                   {sectionKey.replace(/_/g, ' ')}
                 </h4>
-                <div className="bg-slate-50 rounded-lg px-4 py-3 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                <div className="bg-slate-900/50 ring-1 ring-slate-700 rounded-lg px-4 py-3 text-sm text-slate-300 whitespace-pre-wrap">
                   {content}
                 </div>
               </div>
@@ -244,8 +249,7 @@ function ReportViewer({ report }: { report: ReportResult }): React.ReactElement 
             <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Teks Laporan Lengkap
             </h4>
-            <pre className="bg-slate-50 border border-gray-200 rounded-xl p-5 text-xs text-slate-700
-                            whitespace-pre-wrap font-mono leading-relaxed overflow-x-auto">
+            <pre className="bg-slate-900 ring-1 ring-slate-700 rounded-xl p-5 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">
               {report.report_text}
             </pre>
           </div>
@@ -315,15 +319,15 @@ export function Reports(): React.ReactElement {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Laporan Pra-Investigasi</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-white">Laporan Pra-Investigasi</h1>
+        <p className="text-sm text-slate-400 mt-1">
           Generate dan lihat laporan berformat IIA 2025 untuk tender yang dipilih
         </p>
       </div>
 
       {/* Generate controls */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-slate-700">Generate Laporan</h2>
+      <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-5 space-y-4 shadow-card">
+        <h2 className="text-sm font-semibold text-slate-300">Generate Laporan</h2>
 
         {/* High-risk tender buttons */}
         <HighRiskButtons
@@ -340,15 +344,12 @@ export function Reports(): React.ReactElement {
             onChange={(e) => setCustomTenderId(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { void handleCustomLoad() } }}
             placeholder="Masukkan Tender ID custom (e.g. SYN-2018-00627)"
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       placeholder:text-gray-400 font-mono"
+            className="flex-1 px-3 py-2 text-sm bg-slate-700 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-slate-500 font-mono"
           />
           <button
             onClick={() => { void handleCustomLoad() }}
             disabled={!customTenderId.trim() || loadingId === customTenderId}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg
-                       hover:bg-blue-700 disabled:opacity-60 transition-colors"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg disabled:opacity-60 motion-safe:transition-colors"
           >
             Generate
           </button>
@@ -379,23 +380,21 @@ export function Reports(): React.ReactElement {
             {selectedReport ? (
               <ReportViewer report={selectedReport.report} />
             ) : (
-              <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl
-                              flex items-center justify-center" style={{ minHeight: 400 }}>
-                <div className="text-center text-slate-400">
+              <div className="bg-slate-800/40 ring-1 ring-slate-700/50 border-2 border-dashed border-slate-700 rounded-card flex items-center justify-center" style={{ minHeight: 400 }}>
+                <div className="text-center">
                   <p className="text-3xl mb-2">📋</p>
-                  <p className="text-sm font-medium">Pilih laporan untuk melihat detail</p>
+                  <p className="text-sm font-medium text-slate-400">Pilih laporan untuk melihat detail</p>
                 </div>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl
-                        flex items-center justify-center" style={{ minHeight: 300 }}>
-          <div className="text-center text-slate-400 max-w-xs">
+        <div className="bg-slate-800/40 ring-1 ring-slate-700/50 border-2 border-dashed border-slate-700 rounded-card flex items-center justify-center" style={{ minHeight: 300 }}>
+          <div className="text-center max-w-xs">
             <p className="text-4xl mb-3">📄</p>
-            <p className="text-sm font-medium text-slate-600">Belum ada laporan</p>
-            <p className="text-xs mt-1">
+            <p className="text-sm font-medium text-slate-400">Belum ada laporan</p>
+            <p className="text-xs text-slate-500 mt-1">
               Klik salah satu tender di atas atau masukkan Tender ID untuk generate laporan
             </p>
           </div>
@@ -408,7 +407,7 @@ export function Reports(): React.ReactElement {
           {Object.entries(errors).map(([tid, err]) => (
             <div
               key={tid}
-              className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700 flex items-center justify-between"
+              className="bg-red-950/50 border border-red-800 rounded-lg px-4 py-3 text-sm text-red-300 flex items-center justify-between"
             >
               <span><strong>{tid}:</strong> {err}</span>
               <button
@@ -416,7 +415,7 @@ export function Reports(): React.ReactElement {
                   const { [tid]: _, ...rest } = prev
                   return rest
                 })}
-                className="text-red-400 hover:text-red-600 transition-colors ml-4"
+                className="text-red-500 hover:text-red-300 motion-safe:transition-colors ml-4"
               >
                 ✕
               </button>
