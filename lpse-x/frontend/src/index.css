@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  /* Forensic color scale */
+  --color-forensic-50:  #eef2ff;
+  --color-forensic-100: #e0e7ff;
+  --color-forensic-200: #c7d2fe;
+  --color-forensic-300: #a5b4fc;
+  --color-forensic-400: #818cf8;
+  --color-forensic-500: #6366f1;
+  --color-forensic-600: #4f46e5;
+  --color-forensic-700: #4338ca;
+  --color-forensic-800: #3730a3;
+  --color-forensic-900: #312e81;
+  --color-forensic-950: #1e1b4b;
+
+  /* Surface tokens */
+  --color-surface-dark:  #020617;
+  --color-surface-card:  #1e293b;
+  --color-surface-hover: #334155;
+
+  /* Accent tokens */
+  --color-accent-blue:  #3b82f6;
+  --color-accent-cyan:  #06b6d4;
+  --color-accent-amber: #f59e0b;
+
+  /* Risk colors */
+  --color-aman:    #22c55e;
+  --color-pantauan:#f59e0b;
+  --color-tinggi:  #ef4444;
+  --color-kritis:  #7c2d12;
+
+  /* Typography */
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+
+  /* Shadows */
+  --shadow-card:       0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-card-hover: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-glow-blue:  0 0 12px 2px rgb(59 130 246 / 0.25);
+
+  /* Border radius */
+  --radius-card: 0.75rem;
+
+  /* Keyframes for animations */
+  --animate-fade-in:     fadeIn 0.3s ease-out;
+  --animate-slide-up:    slideUp 0.3s ease-out;
+  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* Dark base for html/body */
+html, body, #root {
+  background-color: #020617;
+  color: #f1f5f9;
+  min-height: 100vh;
+}
