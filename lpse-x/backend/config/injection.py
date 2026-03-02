@@ -58,6 +58,7 @@ async def inject_runtime_config(request: InjectionRequest) -> InjectionResponse:
     )
 
 @router.get("/log")
-async def get_config_injection_log() -> list[dict]:
+async def get_config_injection_log() -> dict:
     """Audit trail of all config injections."""
-    return get_injection_log()
+    log = get_injection_log()
+    return {"injection_log": log, "total_injections": len(log)}
