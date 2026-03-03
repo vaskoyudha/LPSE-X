@@ -116,7 +116,7 @@ function CurrentConfigViewer({ config }: { config: Record<string, unknown> }): R
 // Injection log
 // ============================================================================
 
-function InjectionLog({ total, log }: { total: number; log: Array<{ timestamp: string; changes: Record<string, unknown> }> }): React.ReactElement {
+function InjectionLog({ total, log }: { total: number; log: Array<{ timestamp: string; updates: Record<string, unknown> }> }): React.ReactElement {
   const [expanded, setExpanded] = useState(false)
 
   if (total === 0) {
@@ -152,11 +152,11 @@ function InjectionLog({ total, log }: { total: number; log: Array<{ timestamp: s
                 {new Date(entry.timestamp).toLocaleString('id-ID')}
               </span>
               <span className="text-slate-500 bg-white/5 px-2 py-0.5 rounded-full">
-                {Object.keys(entry.changes).length} field
+                {Object.keys(entry.updates).length} field
               </span>
             </div>
             <div className="font-mono text-slate-500 space-y-0.5">
-              {Object.entries(entry.changes).map(([k, v]) => (
+              {Object.entries(entry.updates).map(([k, v]) => (
                 <div key={k}>
                   <span className="text-cyan-400">{k}</span>: <span className="text-slate-300">{JSON.stringify(v)}</span>
                 </div>

@@ -262,7 +262,7 @@ export interface InjectionResponse {
 export interface ConfigLogResponse {
   injection_log: Array<{
     timestamp: string;
-    changes: Record<string, unknown>;
+    updates: Record<string, unknown>;
   }>;
   total_injections: number;
 }
