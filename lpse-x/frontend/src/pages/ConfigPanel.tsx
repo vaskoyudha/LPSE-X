@@ -46,8 +46,14 @@ function parseCustomParams(v: string): Record<string, unknown> | undefined {
 function InjectionResultBanner({ result }: { result: InjectionResponse }): React.ReactElement {
   if (!result.success) {
     return (
-      <div className="bg-red-950/50 border border-red-800 rounded-xl p-4 text-sm text-red-300 space-y-2">
-        <p className="font-bold text-red-400">✗ Injeksi Gagal</p>
+      <div className="bg-red-950/40 border border-red-700/50 rounded-xl p-4 text-sm text-red-300 space-y-2">
+        <p className="font-bold text-red-400 flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          Injeksi Gagal
+        </p>
         {result.validation_errors && result.validation_errors.length > 0 && (
           <ul className="list-disc list-inside space-y-0.5">
             {result.validation_errors.map((err, i) => (
@@ -65,15 +71,21 @@ function InjectionResultBanner({ result }: { result: InjectionResponse }): React
   })
 
   return (
-    <div className="bg-emerald-950/50 border border-emerald-800 rounded-xl p-4 text-sm text-emerald-300 space-y-2">
-      <p className="font-bold text-emerald-400">✓ Injeksi Berhasil — {new Date(result.injected_at).toLocaleString('id-ID')}</p>
+    <div className="bg-emerald-950/40 border border-emerald-700/50 rounded-xl p-4 text-sm text-emerald-300 space-y-2">
+      <p className="font-bold text-emerald-400 flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+        </span>
+        Injeksi Berhasil — {new Date(result.injected_at).toLocaleString('id-ID')}
+      </p>
       {changes.length > 0 && (
         <div className="space-y-1 font-mono text-xs">
           {changes.map(([k, v]) => (
-            <div key={k} className="flex items-center gap-2">
-              <span className="text-emerald-500 font-medium">{k}:</span>
+            <div key={k} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5">
+              <span className="text-emerald-400 font-medium">{k}:</span>
               <span className="text-slate-500 line-through">{JSON.stringify(result.old_values[k])}</span>
-              <span className="text-emerald-400 font-bold">→ {JSON.stringify(v)}</span>
+              <span className="text-emerald-300 font-bold">→ {JSON.stringify(v)}</span>
             </div>
           ))}
         </div>
@@ -83,16 +95,17 @@ function InjectionResultBanner({ result }: { result: InjectionResponse }): React
 }
 
 // ============================================================================
-// Current config viewer
+// Current config viewer — glass terminal style
 // ============================================================================
 
 function CurrentConfigViewer({ config }: { config: Record<string, unknown> }): React.ReactElement {
   return (
-    <div className="bg-slate-900 ring-1 ring-slate-700 rounded-xl p-4 overflow-x-auto">
-      <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-2">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 overflow-x-auto">
+      <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-3 flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
         Konfigurasi Runtime Aktif
       </p>
-      <pre className="text-xs text-green-300 font-mono leading-relaxed">
+      <pre className="text-xs text-emerald-300 font-mono leading-relaxed">
         {JSON.stringify(config, null, 2)}
       </pre>
     </div>
@@ -108,7 +121,7 @@ function InjectionLog({ total, log }: { total: number; log: Array<{ timestamp: s
 
   if (total === 0) {
     return (
-      <div className="text-xs text-slate-500 italic text-center py-3">
+      <div className="text-xs text-slate-500 italic text-center py-4">
         Belum ada injeksi konfigurasi
       </div>
     )
@@ -125,7 +138,7 @@ function InjectionLog({ total, log }: { total: number; log: Array<{ timestamp: s
         {log.length > 3 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-xs text-indigo-400 hover:text-indigo-300 motion-safe:transition-colors"
+            className="text-xs text-cyan-400 hover:text-cyan-300 motion-safe:transition-colors"
           >
             {expanded ? 'Sembunyikan' : `Lihat semua (${log.length})`}
           </button>
@@ -133,17 +146,19 @@ function InjectionLog({ total, log }: { total: number; log: Array<{ timestamp: s
       </div>
       <div className="space-y-1.5">
         {shown.map((entry, i) => (
-          <div key={i} className="bg-slate-700/40 ring-1 ring-slate-600/50 rounded-lg px-3 py-2 text-xs">
+          <div key={i} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs">
             <div className="flex items-center justify-between mb-1">
               <span className="text-slate-500 font-mono">
                 {new Date(entry.timestamp).toLocaleString('id-ID')}
               </span>
-              <span className="text-slate-500">{Object.keys(entry.changes).length} field</span>
+              <span className="text-slate-500 bg-white/5 px-2 py-0.5 rounded-full">
+                {Object.keys(entry.changes).length} field
+              </span>
             </div>
-            <div className="font-mono text-slate-600 space-y-0.5">
+            <div className="font-mono text-slate-500 space-y-0.5">
               {Object.entries(entry.changes).map(([k, v]) => (
                 <div key={k}>
-                  <span className="text-indigo-400">{k}</span>: <span className="text-slate-300">{JSON.stringify(v)}</span>
+                  <span className="text-cyan-400">{k}</span>: <span className="text-slate-300">{JSON.stringify(v)}</span>
                 </div>
               ))}
             </div>
@@ -172,12 +187,13 @@ function FormRow({ label, help, children }: {
   )
 }
 
-const INPUT_CLS = `w-full px-3 py-2 text-sm bg-slate-700 border border-slate-600 rounded-lg
-  text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-  placeholder:text-slate-500`
+const INPUT_CLS = `w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg
+  text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)]
+  motion-safe:transition-all placeholder:text-slate-600`
 
-const SELECT_CLS = `w-full px-3 py-2 text-sm bg-slate-700 border border-slate-600 rounded-lg
-  text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`
+const SELECT_CLS = `w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg
+  text-slate-200 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)]
+  motion-safe:transition-all`
 
 // ============================================================================
 // Main ConfigPanel page
@@ -195,7 +211,6 @@ export function ConfigPanel(): React.ReactElement {
   const [outputFormat, setOutputFormat] = useState<OutputFormat | ''>('')
   const [customParams, setCustomParams] = useState('')
   const [customParamsError, setCustomParamsError] = useState<string | null>(null)
-
   const [injectionResult, setInjectionResult] = useState<InjectionResponse | null>(null)
 
   // Queries
@@ -226,7 +241,7 @@ export function ConfigPanel(): React.ReactElement {
     },
   })
 
-  // Pre-populate form from current config (on first load)
+  // Pre-populate form from current config
   useEffect(() => {
     if (configQuery.data && !injectMutation.isSuccess) {
       const c = configQuery.data
@@ -249,7 +264,6 @@ export function ConfigPanel(): React.ReactElement {
         setOutputFormat(c['output_format'] as OutputFormat)
       }
     }
-  // Run only when config loads
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configQuery.data])
 
@@ -276,9 +290,7 @@ export function ConfigPanel(): React.ReactElement {
     e.preventDefault()
     if (!validateCustomParams()) return
 
-    // Build request — only include fields that were filled
     const req: InjectionRequest = {}
-
     if (procurementScope) req.procurement_scope = procurementScope
     if (institutionFilter.trim()) {
       const parsed = parseInstitutions(institutionFilter)
@@ -317,45 +329,57 @@ export function ConfigPanel(): React.ReactElement {
   return (
     <div className="space-y-5 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between motion-safe:animate-[fade-in-up_0.4s_ease-out_both]">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dynamic Injection</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            Dynamic Injection
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
             Injeksi variabel konfigurasi runtime secara dinamis tanpa restart sistem
           </p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-950/60 border border-red-800 rounded-lg text-xs text-red-400 font-semibold">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-950/50 border border-red-700/50 rounded-lg text-xs text-red-400 font-semibold shadow-[0_0_15px_rgba(244,63,94,0.15)]">
+          <span className="relative flex h-2 w-2">
+            <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
           COMPETITION FEATURE
         </div>
       </div>
 
       {/* Competition notice */}
-      <div className="bg-amber-950/40 border border-amber-800 rounded-xl p-4 text-sm text-amber-300/90 space-y-1">
-        <p className="font-bold text-amber-400">⚠ Fitur Wajib Kompetisi (Find IT! 2026)</p>
+      <div className="bg-amber-950/30 border border-amber-700/50 rounded-xl p-4 text-sm text-amber-300/90 space-y-1 motion-safe:animate-[fade-in-up_0.5s_ease-out_both]">
+        <p className="font-bold text-amber-400 flex items-center gap-2">
+          <span className="text-base">⚠</span>
+          Fitur Wajib Kompetisi (Find IT! 2026)
+        </p>
         <p>
           Sistem WAJIB menerima dan memproses variabel/logika dadakan dari juri.
-          Kegagalan mengimplementasikan Dynamic Injection dapat mengakibatkan <strong>diskualifikasi</strong>.
-          Gunakan field <code className="bg-amber-900/50 px-1 rounded text-amber-300">custom_params</code> untuk parameter arbitrary dari juri.
+          Kegagalan mengimplementasikan Dynamic Injection dapat mengakibatkan{' '}
+          <strong>diskualifikasi</strong>.
+          Gunakan field{' '}
+          <code className="bg-amber-900/40 border border-amber-700/40 px-1.5 py-0.5 rounded text-amber-300 font-mono text-xs">
+            custom_params
+          </code>{' '}
+          untuk parameter arbitrary dari juri.
         </p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         {/* Injection Form */}
-        <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card overflow-hidden shadow-card">
-          <div className="px-5 py-4 border-b border-slate-700 bg-slate-900/50">
-            <h2 className="text-sm font-bold text-slate-200">Form Injeksi Konfigurasi</h2>
+        <div className="glass-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/10 bg-white/5">
+            <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+              <span className="w-1.5 h-4 rounded-full bg-gradient-to-b from-cyan-400 to-indigo-500" />
+              Form Injeksi Konfigurasi
+            </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Kosongkan field untuk tidak mengubah nilai tersebut
             </p>
           </div>
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
 
-            {/* procurement_scope */}
-            <FormRow
-              label="Procurement Scope"
-              help="Filter jenis pengadaan yang dianalisis"
-            >
+            <FormRow label="Procurement Scope" help="Filter jenis pengadaan yang dianalisis">
               <select
                 value={procurementScope}
                 onChange={(e) => setProcurementScope(e.target.value as ProcurementScope | '')}
@@ -369,11 +393,7 @@ export function ConfigPanel(): React.ReactElement {
               </select>
             </FormRow>
 
-            {/* institution_filter */}
-            <FormRow
-              label="Institution Filter"
-              help="Daftar kode instansi dipisah koma (kosongkan untuk semua)"
-            >
+            <FormRow label="Institution Filter" help="Daftar kode instansi dipisah koma (kosongkan untuk semua)">
               <input
                 type="text"
                 value={institutionFilter}
@@ -383,11 +403,7 @@ export function ConfigPanel(): React.ReactElement {
               />
             </FormRow>
 
-            {/* risk_threshold */}
-            <FormRow
-              label="Risk Threshold"
-              help="Ambang batas skor risiko (0.0 – 1.0). Default dari runtime_config.yaml"
-            >
+            <FormRow label="Risk Threshold" help="Ambang batas skor risiko (0.0 – 1.0). Default dari runtime_config.yaml">
               <input
                 type="number"
                 step="0.01"
@@ -400,11 +416,7 @@ export function ConfigPanel(): React.ReactElement {
               />
             </FormRow>
 
-            {/* year_range */}
-            <FormRow
-              label="Year Range"
-              help='Rentang tahun analisis, format: "2020, 2024"'
-            >
+            <FormRow label="Year Range" help='Rentang tahun analisis, format: "2020, 2024"'>
               <input
                 type="text"
                 value={yearRange}
@@ -414,11 +426,7 @@ export function ConfigPanel(): React.ReactElement {
               />
             </FormRow>
 
-            {/* anomaly_method */}
-            <FormRow
-              label="Anomaly Method"
-              help="Algoritma deteksi anomali yang digunakan"
-            >
+            <FormRow label="Anomaly Method" help="Algoritma deteksi anomali yang digunakan">
               <select
                 value={anomalyMethod}
                 onChange={(e) => setAnomalyMethod(e.target.value as AnomalyMethod | '')}
@@ -431,11 +439,7 @@ export function ConfigPanel(): React.ReactElement {
               </select>
             </FormRow>
 
-            {/* output_format */}
-            <FormRow
-              label="Output Format"
-              help="Format output sistem"
-            >
+            <FormRow label="Output Format" help="Format output sistem">
               <select
                 value={outputFormat}
                 onChange={(e) => setOutputFormat(e.target.value as OutputFormat | '')}
@@ -448,7 +452,6 @@ export function ConfigPanel(): React.ReactElement {
               </select>
             </FormRow>
 
-            {/* custom_params — WILDCARD FOR JUDGE */}
             <FormRow
               label="Custom Params (JSON) — Wildcard Juri"
               help='Parameter arbitrary dari juri. Format JSON object: {"key": "value", "flag": true}'
@@ -457,9 +460,7 @@ export function ConfigPanel(): React.ReactElement {
                 value={customParams}
                 onChange={(e) => {
                   setCustomParams(e.target.value)
-                  if (customParamsError) {
-                    setCustomParamsError(null)
-                  }
+                  if (customParamsError) setCustomParamsError(null)
                 }}
                 onBlur={validateCustomParams}
                 rows={4}
@@ -467,13 +468,15 @@ export function ConfigPanel(): React.ReactElement {
                 className={`${INPUT_CLS} font-mono resize-y`}
               />
               {customParamsError && (
-                <p className="text-xs text-red-400 mt-1">⚠ {customParamsError}</p>
+                <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                  <span>⚠</span> {customParamsError}
+                </p>
               )}
             </FormRow>
 
             {/* Mutation error */}
             {injectMutation.isError && (
-              <div className="bg-red-950/50 border border-red-800 rounded-lg p-3 text-xs text-red-300">
+              <div className="bg-red-950/40 border border-red-700/50 rounded-lg p-3 text-xs text-red-300">
                 Error: {injectMutation.error instanceof Error
                   ? injectMutation.error.message
                   : 'Injeksi gagal — pastikan backend berjalan'}
@@ -485,7 +488,11 @@ export function ConfigPanel(): React.ReactElement {
               <button
                 type="submit"
                 disabled={injectMutation.isPending}
-                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-500 disabled:opacity-60 motion-safe:transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-cyan-600
+                           hover:from-indigo-500 hover:to-cyan-500 text-white text-sm font-bold rounded-lg
+                           disabled:opacity-60 motion-safe:hover:scale-[1.02]
+                           motion-safe:hover:shadow-[0_0_20px_rgba(6,182,212,0.35)]
+                           motion-safe:transition-all duration-200 flex items-center justify-center gap-2"
               >
                 {injectMutation.isPending ? (
                   <>
@@ -502,7 +509,8 @@ export function ConfigPanel(): React.ReactElement {
               <button
                 type="button"
                 onClick={handleReset}
-                className="px-4 py-2.5 bg-slate-700 text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-600 motion-safe:transition-colors"
+                className="px-4 py-2.5 bg-white/5 border border-white/10 text-slate-300 text-sm font-medium rounded-lg
+                           hover:bg-white/10 motion-safe:transition-all duration-200"
               >
                 Reset
               </button>
@@ -520,13 +528,16 @@ export function ConfigPanel(): React.ReactElement {
         {/* Right column: current config + log */}
         <div className="space-y-4">
           {/* Current config */}
-          <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card overflow-hidden shadow-card">
-            <div className="px-5 py-3 border-b border-slate-700 bg-slate-900/50 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-slate-200">Konfigurasi Runtime Saat Ini</h2>
+          <div className="glass-card overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/10 bg-white/5 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                Konfigurasi Runtime Saat Ini
+              </h2>
               <button
                 onClick={() => void configQuery.refetch()}
                 disabled={configQuery.isFetching}
-                className="text-xs text-indigo-400 hover:text-indigo-300 motion-safe:transition-colors disabled:opacity-50"
+                className="text-xs text-cyan-400 hover:text-cyan-300 motion-safe:transition-colors disabled:opacity-50"
               >
                 {configQuery.isFetching ? '⟳ Memuat...' : '⟳ Refresh'}
               </button>
@@ -547,13 +558,16 @@ export function ConfigPanel(): React.ReactElement {
           </div>
 
           {/* Injection log */}
-          <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card overflow-hidden shadow-card">
-            <div className="px-5 py-3 border-b border-slate-700 bg-slate-900/50 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-slate-200">Log Injeksi</h2>
+          <div className="glass-card overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/10 bg-white/5 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                Log Injeksi
+              </h2>
               <button
                 onClick={() => void logQuery.refetch()}
                 disabled={logQuery.isFetching}
-                className="text-xs text-indigo-400 hover:text-indigo-300 motion-safe:transition-colors disabled:opacity-50"
+                className="text-xs text-cyan-400 hover:text-cyan-300 motion-safe:transition-colors disabled:opacity-50"
               >
                 {logQuery.isFetching ? '⟳' : '⟳ Refresh'}
               </button>
@@ -563,9 +577,7 @@ export function ConfigPanel(): React.ReactElement {
                 <p className="text-xs text-slate-500 italic text-center py-4">Memuat log...</p>
               )}
               {logQuery.isError && (
-                <p className="text-xs text-red-400 italic text-center py-4">
-                  Log tidak tersedia
-                </p>
+                <p className="text-xs text-red-400 italic text-center py-4">Log tidak tersedia</p>
               )}
               {logQuery.isSuccess && logQuery.data && (
                 <InjectionLog
@@ -577,7 +589,7 @@ export function ConfigPanel(): React.ReactElement {
           </div>
 
           {/* Field reference table */}
-          <div className="bg-slate-800/50 ring-1 ring-slate-700/50 rounded-card p-4">
+          <div className="glass-card p-4">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
               Referensi Field yang Dapat Diinjeksi
             </p>
@@ -589,18 +601,18 @@ export function ConfigPanel(): React.ReactElement {
                   <th className="pb-2">Deskripsi</th>
                 </tr>
               </thead>
-              <tbody className="text-slate-400 divide-y divide-slate-700/50">
+              <tbody className="text-slate-400 divide-y divide-white/5">
                 {[
-                  { field: 'procurement_scope', type: 'enum', desc: 'Jenis pengadaan yang dianalisis' },
-                  { field: 'institution_filter', type: 'string[]', desc: 'Filter kode instansi' },
-                  { field: 'risk_threshold', type: 'float 0–1', desc: 'Ambang batas risiko' },
-                  { field: 'year_range', type: '[int, int]', desc: 'Rentang tahun data' },
-                  { field: 'anomaly_method', type: 'enum', desc: 'Algoritma deteksi anomali' },
-                  { field: 'output_format', type: 'enum', desc: 'Format output sistem' },
-                  { field: 'custom_params', type: 'JSON obj', desc: 'Parameter wildcard (juri)' },
+                  { field: 'procurement_scope', type: 'enum',       desc: 'Jenis pengadaan yang dianalisis' },
+                  { field: 'institution_filter', type: 'string[]',  desc: 'Filter kode instansi' },
+                  { field: 'risk_threshold',     type: 'float 0–1', desc: 'Ambang batas risiko' },
+                  { field: 'year_range',         type: '[int, int]', desc: 'Rentang tahun data' },
+                  { field: 'anomaly_method',     type: 'enum',       desc: 'Algoritma deteksi anomali' },
+                  { field: 'output_format',      type: 'enum',       desc: 'Format output sistem' },
+                  { field: 'custom_params',      type: 'JSON obj',   desc: 'Parameter wildcard (juri)' },
                 ].map(({ field, type, desc }) => (
-                  <tr key={field}>
-                    <td className="py-1.5 pr-3 font-mono text-indigo-400 font-medium">{field}</td>
+                  <tr key={field} className="motion-safe:hover:bg-white/5 motion-safe:transition-colors">
+                    <td className="py-1.5 pr-3 font-mono text-cyan-400 font-medium">{field}</td>
                     <td className="py-1.5 pr-3 text-slate-500 italic">{type}</td>
                     <td className="py-1.5 text-slate-400">{desc}</td>
                   </tr>

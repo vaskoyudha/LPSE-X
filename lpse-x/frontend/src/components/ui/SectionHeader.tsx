@@ -5,9 +5,14 @@ export interface SectionHeaderProps {
   description?: string;
   icon?: React.ReactNode;
   action?: React.ReactNode;
+  gradient?: boolean;
 }
 
-export function SectionHeader({ title, description, icon, action }: SectionHeaderProps) {
+export function SectionHeader({ title, description, icon, action, gradient = false }: SectionHeaderProps) {
+  const titleClass = gradient 
+    ? "text-lg font-semibold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent"
+    : "text-lg font-semibold text-white";
+
   return (
     <div className="flex justify-between items-start mb-6">
       <div className="flex items-center gap-3">
@@ -17,7 +22,7 @@ export function SectionHeader({ title, description, icon, action }: SectionHeade
           </div>
         )}
         <div>
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+          <h2 className={titleClass}>{title}</h2>
           {description && (
             <p className="text-sm text-slate-400 mt-0.5">{description}</p>
           )}

@@ -15,7 +15,7 @@ export function Button({
   className = '', 
   ...props 
 }: ButtonProps) {
-  let variantClasses = 'bg-indigo-600 hover:bg-indigo-500 text-white';
+  let variantClasses = 'bg-indigo-600 hover:bg-indigo-500 text-white motion-safe:hover:scale-105 motion-safe:transition-transform duration-150 hover:shadow-[0_0_20px_rgba(6,182,212,0.35)]';
   if (variant === 'secondary') variantClasses = 'bg-slate-700 hover:bg-slate-600 text-slate-200 ring-1 ring-slate-600';
   else if (variant === 'danger') variantClasses = 'bg-red-700 hover:bg-red-600 text-white';
   else if (variant === 'ghost') variantClasses = 'text-slate-400 hover:text-white hover:bg-slate-800';
@@ -24,7 +24,7 @@ export function Button({
   if (size === 'sm') sizeClasses = 'text-xs px-3 py-1.5';
   else if (size === 'lg') sizeClasses = 'text-base px-5 py-2.5';
 
-  const baseClasses = 'inline-flex items-center gap-2 font-medium rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 motion-safe:transition-colors motion-safe:duration-150';
+  const baseClasses = 'inline-flex items-center gap-2 font-medium rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 motion-safe:transition-all motion-safe:duration-150 motion-safe:active:scale-95';
   const isDisabled = disabled || loading;
 
   return (

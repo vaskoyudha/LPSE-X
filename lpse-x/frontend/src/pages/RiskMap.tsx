@@ -167,8 +167,6 @@ const PROVINCE_CENTERS: Record<string, [number, number]> = {
   Papua: [-4.2699, 138.0804],
 }
 
-// Map of kabupaten names to approximate province (derived from common knowledge)
-// Only listing ones that appear in the DB based on the seed data
 const KABUPATEN_TO_PROVINCE: Record<string, string> = {
   'Kutai Barat': 'Kalimantan Timur',
   'Barito Utara': 'Kalimantan Tengah',
@@ -183,9 +181,7 @@ const KABUPATEN_TO_PROVINCE: Record<string, string> = {
 }
 
 function getBuyerCoords(buyerName: string): [number, number] | null {
-  // Direct lookup (Provinsi or Kota)
   if (REGION_COORDS[buyerName]) return REGION_COORDS[buyerName]
-  // Try Kabupaten → province center
   if (buyerName.startsWith('Kabupaten ')) {
     const kabName = buyerName.replace('Kabupaten ', '')
     const prov = KABUPATEN_TO_PROVINCE[kabName]
@@ -232,26 +228,44 @@ function getRadius(r: RegionRisk): number {
 }
 
 // ============================================================================
-// Statistics card
+// Statistics card — premium glass style
 // ============================================================================
 
-function StatCard({ label, value, sub, color }: {
+const STAT_GRADIENTS: Record<string, string> = {
+  total:    'from-cyan-600/20 to-sky-900/40 border-cyan-500/20',
+  kritis:   'from-red-600/20 to-rose-900/40 border-red-500/20',
+  tinggi:   'from-orange-600/20 to-orange-900/40 border-orange-500/20',
+  pantauan: 'from-amber-600/20 to-amber-900/40 border-amber-500/20',
+  aman:     'from-emerald-600/20 to-teal-900/40 border-emerald-500/20',
+}
+
+const STAT_TEXT_COLORS: Record<string, string> = {
+  total:    'text-cyan-400',
+  kritis:   'text-red-400',
+  tinggi:   'text-orange-400',
+  pantauan: 'text-amber-400',
+  aman:     'text-emerald-400',
+}
+
+function StatCard({ label, value, sub, colorKey }: {
   label: string
   value: number | string
   sub?: string
-  color?: string
+  colorKey: string
 }): React.ReactElement {
+  const gradientCls = STAT_GRADIENTS[colorKey] ?? STAT_GRADIENTS['total']
+  const textCls = STAT_TEXT_COLORS[colorKey] ?? 'text-slate-200'
   return (
-    <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-4 text-center shadow-card">
-      <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">{label}</p>
-      <p className={`text-2xl font-bold ${color ?? 'text-slate-200'}`}>{value}</p>
-      {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+    <div className={`bg-gradient-to-br ${gradientCls} border rounded-2xl p-4 text-center motion-safe:animate-[fade-in-up_0.5s_ease-out_both] backdrop-blur-sm`}>
+      <p className="text-xs text-slate-400 mb-1 font-medium uppercase tracking-wide">{label}</p>
+      <p className={`text-2xl font-bold font-mono ${textCls}`}>{value}</p>
+      {sub && <p className="text-xs text-slate-500 mt-1 font-mono">{sub}</p>}
     </div>
   )
 }
 
 // ============================================================================
-// Region detail table
+// Region detail table — glass style
 // ============================================================================
 
 function RegionTable({ regions, selectedRegion, onSelect }: {
@@ -261,13 +275,13 @@ function RegionTable({ regions, selectedRegion, onSelect }: {
 }): React.ReactElement {
   const sorted = [...regions].sort((a, b) => (b.kritis + b.tinggi) - (a.kritis + a.tinggi))
   return (
-    <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-700 bg-slate-900/50">
+    <div className="glass-card overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/10 bg-white/5">
         <h3 className="text-sm font-semibold text-slate-300">Daftar Wilayah</h3>
       </div>
       <div className="overflow-y-auto" style={{ maxHeight: 340 }}>
         <table className="text-xs w-full">
-          <thead className="sticky top-0 bg-slate-900">
+          <thead className="sticky top-0 bg-[#020617]/90 backdrop-blur-sm">
             <tr>
               <th className="px-3 py-2 text-left text-slate-500 font-medium">Wilayah</th>
               <th className="px-3 py-2 text-right text-red-400 font-medium">Kritis</th>
@@ -277,7 +291,7 @@ function RegionTable({ regions, selectedRegion, onSelect }: {
               <th className="px-3 py-2 text-right text-slate-400 font-medium">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/50">
+          <tbody className="divide-y divide-white/5">
             {sorted.map((p) => {
               const total = p.kritis + p.tinggi + p.pantauan + p.aman
               const isSelected = selectedRegion === p.name
@@ -285,8 +299,10 @@ function RegionTable({ regions, selectedRegion, onSelect }: {
                 <tr
                   key={p.name}
                   onClick={() => onSelect(isSelected ? null : p.name)}
-                  className={`cursor-pointer motion-safe:transition-colors ${
-                    isSelected ? 'bg-indigo-900/20' : 'hover:bg-slate-700/40'
+                  className={`cursor-pointer motion-safe:transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-white/10 border-l-2 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.15)]'
+                      : 'motion-safe:hover:bg-white/5 motion-safe:hover:shadow-[0_0_15px_rgba(6,182,212,0.08)]'
                   }`}
                 >
                   <td className="px-3 py-2">
@@ -298,11 +314,11 @@ function RegionTable({ regions, selectedRegion, onSelect }: {
                       <span className="font-medium text-slate-300">{p.name}</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-right text-red-400 font-medium">{p.kritis}</td>
-                  <td className="px-3 py-2 text-right text-orange-400 font-medium">{p.tinggi}</td>
-                  <td className="px-3 py-2 text-right text-amber-400 font-medium">{p.pantauan}</td>
-                  <td className="px-3 py-2 text-right text-green-400 font-medium">{p.aman}</td>
-                  <td className="px-3 py-2 text-right text-slate-400">{total}</td>
+                  <td className="px-3 py-2 text-right text-red-400 font-medium font-mono">{p.kritis}</td>
+                  <td className="px-3 py-2 text-right text-orange-400 font-medium font-mono">{p.tinggi}</td>
+                  <td className="px-3 py-2 text-right text-amber-400 font-medium font-mono">{p.pantauan}</td>
+                  <td className="px-3 py-2 text-right text-green-400 font-medium font-mono">{p.aman}</td>
+                  <td className="px-3 py-2 text-right text-slate-400 font-mono">{total}</td>
                 </tr>
               )
             })}
@@ -371,7 +387,7 @@ export function RiskMap(): React.ReactElement {
         let page = 1
         let totalCount = 0
         const allItems: TenderWithRisk[] = []
-        
+
         do {
           const res = await listTenders({ page, page_size: PAGE_SIZE })
           if (cancelled) return
@@ -379,7 +395,7 @@ export function RiskMap(): React.ReactElement {
           allItems.push(...res.items)
           page++
         } while (allItems.length < totalCount)
-        
+
         if (!cancelled) {
           setTotalTenders(totalCount)
           setRegions(aggregateTenders(allItems))
@@ -394,46 +410,78 @@ export function RiskMap(): React.ReactElement {
     return () => { cancelled = true }
   }, [])
 
-  const totalKritis = regions.reduce((s, p) => s + p.kritis, 0)
-  const totalTinggi = regions.reduce((s, p) => s + p.tinggi, 0)
+  const totalKritis   = regions.reduce((s, p) => s + p.kritis,   0)
+  const totalTinggi   = regions.reduce((s, p) => s + p.tinggi,   0)
   const totalPantauan = regions.reduce((s, p) => s + p.pantauan, 0)
-  const totalAman = regions.reduce((s, p) => s + p.aman, 0)
+  const totalAman     = regions.reduce((s, p) => s + p.aman,     0)
 
   const selectedData = selectedRegion ? regions.find((p) => p.name === selectedRegion) : null
-  const riskLabel = selectedData ? getRiskLabel(selectedData) : null
+  const riskLabel    = selectedData ? getRiskLabel(selectedData) : null
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between motion-safe:animate-[fade-in-up_0.4s_ease-out_both]">
         <div>
-          <h1 className="text-2xl font-bold text-white">Peta Risiko Geografis</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            Peta Risiko Geografis
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Distribusi risiko pengadaan per wilayah — {totalTenders.toLocaleString('id-ID')} tender
+            Distribusi risiko pengadaan per wilayah —{' '}
+            <span className="font-mono text-cyan-400">{totalTenders.toLocaleString('id-ID')}</span> tender
           </p>
         </div>
         {isLoading && (
-          <span className="text-sm text-slate-500 animate-pulse">Memuat data peta...</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-lg">
+            <span className="relative flex h-2 w-2">
+              <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+            </span>
+            <span className="text-xs text-slate-400">Memuat data peta...</span>
+          </div>
         )}
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-5 gap-3">
-        <StatCard label="Total Tender" value={totalTenders.toLocaleString('id-ID')} color="text-slate-200" />
-        <StatCard label="Risiko Kritis" value={totalKritis} color="text-red-400"
-          sub={totalTenders > 0 ? `${((totalKritis / totalTenders) * 100).toFixed(1)}%` : undefined} />
-        <StatCard label="Risiko Tinggi" value={totalTinggi} color="text-orange-400"
-          sub={totalTenders > 0 ? `${((totalTinggi / totalTenders) * 100).toFixed(1)}%` : undefined} />
-        <StatCard label="Perlu Pantauan" value={totalPantauan} color="text-amber-400"
-          sub={totalTenders > 0 ? `${((totalPantauan / totalTenders) * 100).toFixed(1)}%` : undefined} />
-        <StatCard label="Aman" value={totalAman} color="text-green-400"
-          sub={totalTenders > 0 ? `${((totalAman / totalTenders) * 100).toFixed(1)}%` : undefined} />
+        <StatCard
+          label="Total Tender"
+          value={totalTenders.toLocaleString('id-ID')}
+          colorKey="total"
+        />
+        <StatCard
+          label="Risiko Kritis"
+          value={totalKritis}
+          colorKey="kritis"
+          sub={totalTenders > 0 ? `${((totalKritis / totalTenders) * 100).toFixed(1)}%` : undefined}
+        />
+        <StatCard
+          label="Risiko Tinggi"
+          value={totalTinggi}
+          colorKey="tinggi"
+          sub={totalTenders > 0 ? `${((totalTinggi / totalTenders) * 100).toFixed(1)}%` : undefined}
+        />
+        <StatCard
+          label="Perlu Pantauan"
+          value={totalPantauan}
+          colorKey="pantauan"
+          sub={totalTenders > 0 ? `${((totalPantauan / totalTenders) * 100).toFixed(1)}%` : undefined}
+        />
+        <StatCard
+          label="Aman"
+          value={totalAman}
+          colorKey="aman"
+          sub={totalTenders > 0 ? `${((totalAman / totalTenders) * 100).toFixed(1)}%` : undefined}
+        />
       </div>
 
       {/* Map + table */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Map */}
-        <div className="xl:col-span-2 rounded-card overflow-hidden ring-1 ring-slate-700 shadow-card" style={{ height: 460 }}>
+        <div
+          className="xl:col-span-2 rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(6,182,212,0.1)]"
+          style={{ height: 460 }}
+        >
           <MapContainer
             center={[-2.5, 117.8]}
             zoom={5}
@@ -496,7 +544,7 @@ export function RiskMap(): React.ReactElement {
 
           {/* Selected detail card */}
           {selectedData && riskLabel && (
-            <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-4 space-y-3">
+            <div className="glass-card p-4 space-y-3 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)] motion-safe:animate-[fade-in-up_0.3s_ease-out_both]">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-slate-200">{selectedData.name}</h3>
                 <span className={`text-xs px-2 py-1 rounded-full font-semibold ${DARK_RISK_BG[riskLabel] ?? 'bg-slate-700 text-slate-300'}`}>
@@ -505,14 +553,14 @@ export function RiskMap(): React.ReactElement {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { label: 'Kritis', value: selectedData.kritis, cls: 'text-red-400' },
-                  { label: 'Tinggi', value: selectedData.tinggi, cls: 'text-orange-400' },
-                  { label: 'Pantauan', value: selectedData.pantauan, cls: 'text-amber-400' },
-                  { label: 'Aman', value: selectedData.aman, cls: 'text-green-400' },
-                ].map(({ label, value, cls }) => (
-                  <div key={label} className="bg-slate-700/50 ring-1 ring-slate-600 rounded-lg p-2 text-center">
+                  { label: 'Kritis',   value: selectedData.kritis,   cls: 'text-red-400',      grad: 'from-red-600/20 to-rose-900/40 border-red-500/20' },
+                  { label: 'Tinggi',   value: selectedData.tinggi,   cls: 'text-orange-400',   grad: 'from-orange-600/20 to-orange-900/40 border-orange-500/20' },
+                  { label: 'Pantauan', value: selectedData.pantauan, cls: 'text-amber-400',    grad: 'from-amber-600/20 to-amber-900/40 border-amber-500/20' },
+                  { label: 'Aman',     value: selectedData.aman,     cls: 'text-emerald-400',  grad: 'from-emerald-600/20 to-teal-900/40 border-emerald-500/20' },
+                ].map(({ label, value, cls, grad }) => (
+                  <div key={label} className={`bg-gradient-to-br ${grad} border rounded-xl p-2 text-center`}>
                     <p className="text-xs text-slate-400">{label}</p>
-                    <p className={`text-lg font-bold ${cls}`}>{value}</p>
+                    <p className={`text-lg font-bold font-mono ${cls}`}>{value}</p>
                   </div>
                 ))}
               </div>
@@ -522,28 +570,23 @@ export function RiskMap(): React.ReactElement {
       </div>
 
       {/* Legend */}
-      <div className="bg-slate-800 ring-1 ring-slate-700 rounded-card p-4">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+      <div className="glass-card p-4">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
           Legenda Warna Marker
         </p>
         <div className="flex flex-wrap gap-5 text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-red-600 opacity-70 border-2 border-red-600" />
-            Risiko Kritis (≥25% tender bermasalah)
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-orange-500 opacity-70 border-2 border-orange-500" />
-            Risiko Tinggi (15–25%)
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-amber-400 opacity-70 border-2 border-amber-400" />
-            Perlu Pantauan (8–15%)
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-green-500 opacity-70 border-2 border-green-500" />
-            Aman (&lt;8%)
-          </div>
-          <div className="flex items-center gap-2 ml-4 pl-4 border-l border-slate-700">
+          {[
+            { color: 'bg-red-600',    glow: 'shadow-[0_0_8px_rgba(220,38,38,0.6)]',   label: 'Risiko Kritis (≥25% tender bermasalah)' },
+            { color: 'bg-orange-500', glow: 'shadow-[0_0_8px_rgba(249,115,22,0.6)]',  label: 'Risiko Tinggi (15–25%)' },
+            { color: 'bg-amber-400',  glow: 'shadow-[0_0_8px_rgba(245,158,11,0.6)]',  label: 'Perlu Pantauan (8–15%)' },
+            { color: 'bg-green-500',  glow: 'shadow-[0_0_8px_rgba(34,197,94,0.6)]',   label: 'Aman (<8%)' },
+          ].map(({ color, glow, label }) => (
+            <div key={label} className="flex items-center gap-2">
+              <span className={`w-3.5 h-3.5 rounded-full ${color} opacity-80 ${glow}`} />
+              {label}
+            </div>
+          ))}
+          <div className="flex items-center gap-2 ml-4 pl-4 border-l border-white/10">
             <span className="text-slate-500">Ukuran marker</span>
             → volume tender wilayah
           </div>
