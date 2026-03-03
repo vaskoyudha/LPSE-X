@@ -74,14 +74,24 @@ app.include_router(tenders.router)          # /api/tenders GET, /api/tenders/{id
 
 # ---------------------------------------------------------------------------
 # Static frontend — serve dist/ if built (offline-capable single-process mode)
+# SPA fallback: any non-API, non-static path returns index.html
 # ---------------------------------------------------------------------------
-
 _DIST_DIR = pathlib.Path(__file__).parent.parent / "frontend" / "dist"
 if _DIST_DIR.exists():
     from fastapi.staticfiles import StaticFiles
-    # Mount AFTER all /api routes so they take priority
-    app.mount("/", StaticFiles(directory=str(_DIST_DIR), html=True), name="frontend")
-    logger.info("Serving frontend from %s", _DIST_DIR)
+    from fastapi.responses import HTMLResponse
+
+    _INDEX_HTML = _DIST_DIR / "index.html"
+
+    # Serve real static assets (JS, CSS, images) under /assets/
+    app.mount("/assets", StaticFiles(directory=str(_DIST_DIR / "assets")), name="assets")
+
+    # SPA catch-all: return index.html for any path not matched by /api or /assets
+    @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
+    async def _spa_fallback(full_path: str):
+        return _INDEX_HTML.read_text(encoding="utf-8")
+
+    logger.info("Serving frontend from %s (SPA mode)", _DIST_DIR)
 
 
 # ---------------------------------------------------------------------------

@@ -4,11 +4,12 @@ GET  /api/xai/{tender_id}  — run Oracle Sandwich (SHAP+Anchors+Benford+Leiden)
 POST /api/xai/dice/precompute — kick off background DiCE computation (non-blocking)
 """
 from __future__ import annotations
-
 import asyncio
+import json
 import logging
 from datetime import datetime, timezone
 from typing import Any
+import aiosqlite
 
 import pandas as pd
 from fastapi import APIRouter, HTTPException
@@ -107,10 +108,54 @@ async def get_xai_explanation(tender_id: str, request: XaiRequest) -> dict:
         if tender_id in _dice_results:
             dice_cache = {tender_id: _dice_results[tender_id]}
 
-        # Get cached Leiden communities if available (stub — real impl in T17)
+        # ---- Leiden: look up tender's vendor community from DB ----
         leiden_communities = None
-
         amount_series = None
+        try:
+            async with aiosqlite.connect("data/lpse_x.db") as db:
+                db.row_factory = aiosqlite.Row
+                # Get tender's vendor hash
+                cur = await db.execute(
+                    "SELECT npwp_hash FROM tenders WHERE tender_id = ?",
+                    (tender_id,),
+                )
+                tender_row = await cur.fetchone()
+                vendor_hash = tender_row["npwp_hash"] if tender_row else None
+
+                if vendor_hash:
+                    # Find community containing this vendor
+                    cur2 = await db.execute(
+                        "SELECT community_id, member_ids, risk_score, size FROM communities"
+                    )
+                    comm_rows = await cur2.fetchall()
+                    for crow in comm_rows:
+                        members = json.loads(crow["member_ids"])
+                        if vendor_hash in members:
+                            leiden_communities = {
+                                tender_id: {
+                                    "community_id": crow["community_id"],
+                                    "members": members,
+                                    "risk_score": crow["risk_score"],
+                                    "size": crow["size"],
+                                    "vendor_hash": vendor_hash,
+                                }
+                            }
+                            break
+
+                # ---- Benford: fetch all positive value_amounts from DB ----
+                cur3 = await db.execute(
+                    "SELECT value_amount FROM tenders WHERE value_amount IS NOT NULL AND value_amount > 0"
+                )
+                amount_rows = await cur3.fetchall()
+                if len(amount_rows) >= 100:
+                    amount_series = pd.Series(
+                        [float(r["value_amount"]) for r in amount_rows],
+                        dtype=float,
+                    )
+        except Exception as db_exc:
+            logger.warning("XAI DB lookup failed (Leiden/Benford): %s", db_exc)
+
+        # Override with request-provided amounts if available
         if request.amount_values:
             amount_series = pd.Series(request.amount_values)
 

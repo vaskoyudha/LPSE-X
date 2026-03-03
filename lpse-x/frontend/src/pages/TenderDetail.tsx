@@ -51,12 +51,24 @@ function ShapWaterfall({ layer }: { layer: XAILayer }): React.ReactElement {
   }
 
   const data = layer.data as Record<string, unknown>
-  const shapValues = (data.shap_values ?? data.values ?? {}) as Record<string, number>
   const baseValue = typeof data.base_value === 'number' ? data.base_value : 0.5
-
-  const entries = Object.entries(shapValues)
-    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
-    .slice(0, 12)
+  // Backend returns feature_names[] + shap_values[] as parallel arrays
+  // Zip them into [name, value] entries sorted by |SHAP|
+  let entries: Array<[string, number]> = []
+  const featureNames = data.feature_names as string[] | undefined
+  const shapArr = data.shap_values as number[] | undefined
+  if (Array.isArray(featureNames) && Array.isArray(shapArr)) {
+    entries = featureNames
+      .map((name, i): [string, number] => [name, shapArr[i] ?? 0])
+      .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+      .slice(0, 12)
+  } else {
+    // Fallback: shap_values as Record<string, number>
+    const shapObj = (data.shap_values ?? data.values ?? {}) as Record<string, number>
+    entries = Object.entries(shapObj)
+      .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+      .slice(0, 12)
+  }
 
   if (entries.length === 0) {
     return <div className="text-center py-8 text-slate-400 text-sm">Tidak ada data SHAP</div>
